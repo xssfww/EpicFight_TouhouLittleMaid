@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Specification-Title: ef_tlm
+Specification-Vendor: XcS
+Specification-Version: 1
+Implementation-Title: EF_TLM
+Implementation-Version: 
+Implementation-Vendor: XcS
+Implementation-Timestamp: 2026-05-02T15:14:21+0800
+MixinConfigs: ef_tlm.mixins.json
+

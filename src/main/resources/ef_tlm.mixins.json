@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.EFTLM.Mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ef_tlm.refmap.json",
+  "mixins": [
+    "ServerPlayerPatchMixin"
+  ],
+  "client": [
+    "AbstractClientPlayerPatchMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

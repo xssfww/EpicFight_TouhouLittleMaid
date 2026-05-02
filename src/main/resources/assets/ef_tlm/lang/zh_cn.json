@@ -1,0 +1,6 @@
+{
+  "task.ef_tlm.fight_mode_task": "战斗模式",
+  "task.ef_tlm.fight_mode_task.desc": "女仆会变换成史诗战斗下的渲染模式和攻击逻辑",
+  "task.ef_tlm.fight_mode_task.condition.assault_weapon": "女仆需要手持拥有武器类型的武器",
+  "message.eftlm.reload_mesh": "§b[史诗战斗：车万女仆]§r 重载完毕. 找到了 %s 个网格模型"
+}

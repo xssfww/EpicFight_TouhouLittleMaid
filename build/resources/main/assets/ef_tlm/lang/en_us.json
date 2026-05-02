@@ -1,0 +1,6 @@
+{
+  "task.ef_tlm.fight_mode_task": "Fight Mode",
+  "task.ef_tlm.fight_mode_task.desc": "Now,We have the EpicFight Power.",
+  "task.ef_tlm.fight_mode_task.condition.assault_weapon": "Maid need EpicFight's WeaponCapability Weapon",
+  "message.eftlm.reload_mesh": "§b[EpicFight：TouhouLittleMaid]§r Reload Complete. Found %s MeshModel"
+}
