@@ -2,5 +2,17 @@
   "task.ef_tlm.fight_mode_task": "Fight Mode",
   "task.ef_tlm.fight_mode_task.desc": "Now,We have the EpicFight Power.",
   "task.ef_tlm.fight_mode_task.condition.assault_weapon": "Maid need EpicFight's WeaponCapability Weapon",
-  "message.eftlm.reload_mesh": "§b[EpicFight：TouhouLittleMaid]§r Reload Complete. Found %s MeshModel"
+  "message.eftlm.reload_mesh": "§b[EpicFight：TouhouLittleMaid]§r Reload Complete. Found %s MeshModel",
+  "message.eftlm.add_maid_skill_success": "Added %s maids form %s skill",
+  "message.eftlm.add_maid_skill_failure": "No maids available to add skill",
+  "message.eftlm.remove_maid_skill_success": "Remove %s maids form %s skill",
+  "message.eftlm.remove_maid_skill_failure": "No maids available to remove skill",
+  "message.eftlm.clear_maid_skill": "Clear %s maids skills",
+  "gui.ef_tlm.button.skill_book": "Skills",
+  "gui.ef_tlm.button.skill_book.desc": "Used to View the SkillBooks currently being studied by the Maid",
+  "screen.ef_tlm.maid_skill": "Maid's Skill",
+  "maid_skill.ef_tlm.blade_clash": "BladeClash",
+  "maid_skill.ef_tlm.blade_clash.desc": "Defend against enemy attacks with offensive tactics during battles!",
+  "maid_skill.ef_tlm.board_blade_innate": "BreakingEdge",
+  "maid_skill.ef_tlm.board_blade_innate.desc": "Bloodbath: Upon killing an enemy, gain speed boost and continuous health regeneration"
 }

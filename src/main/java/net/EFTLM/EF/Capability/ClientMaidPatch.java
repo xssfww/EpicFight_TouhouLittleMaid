@@ -2,15 +2,10 @@ package net.EFTLM.EF.Capability;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-public class ClientMaidPatch extends MaidPatch<EntityMaid>{
-    @Override
-    public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
-        return false;
-    }
+public class ClientMaidPatch extends MaidPatch<EntityMaid> {
     @Override
     public boolean overrideRender() {
-        if (this.isHugByOwner() || this.isSleep() || this.isSit()) {
+        if (this.CheckState()) {
             return false;
         }
         return this.isFightMode();

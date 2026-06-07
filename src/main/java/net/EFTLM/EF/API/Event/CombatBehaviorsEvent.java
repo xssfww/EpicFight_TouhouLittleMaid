@@ -1,4 +1,4 @@
-package net.EFTLM.EF.Api.Event;
+package net.EFTLM.EF.API.Event;
 
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.Event;

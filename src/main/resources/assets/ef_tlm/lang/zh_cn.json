@@ -2,5 +2,17 @@
   "task.ef_tlm.fight_mode_task": "战斗模式",
   "task.ef_tlm.fight_mode_task.desc": "女仆会变换成史诗战斗下的渲染模式和攻击逻辑",
   "task.ef_tlm.fight_mode_task.condition.assault_weapon": "女仆需要手持拥有武器类型的武器",
-  "message.eftlm.reload_mesh": "§b[史诗战斗：车万女仆]§r 重载完毕. 找到了 %s 个网格模型"
+  "message.eftlm.reload_mesh": "§b[史诗战斗：车万女仆]§r 重载完毕. 找到了 %s 个网格模型",
+  "message.eftlm.add_maid_skill_success": "已为 %s 个女仆添加了技能 %s",
+  "message.eftlm.add_maid_skill_failure": "没有可添加技能的女仆",
+  "message.eftlm.remove_maid_skill_success": "已为 %s 个女仆移除了技能 %s",
+  "message.eftlm.remove_maid_skill_failure": "没有可移除技能的女仆",
+  "message.eftlm.clear_maid_skill": "移除了 %s 个女仆的所有技能",
+  "gui.ef_tlm.button.skill_book": "技能表",
+  "gui.ef_tlm.button.skill_book.desc": "用于查看当前女仆学习的技能书",
+  "screen.ef_tlm.maid_skill": "女仆技能书",
+  "maid_skill.ef_tlm.blade_clash": "拼刀",
+  "maid_skill.ef_tlm.blade_clash.desc": "与敌人战斗中以攻势防御住敌人的攻击！\n\n§L§8天下武功，唯快不破！",
+  "maid_skill.ef_tlm.board_blade_innate": "破锋",
+  "maid_skill.ef_tlm.board_blade_innate.desc": "浴血: 造成击杀后获得速度加成并持续恢复生命"
 }

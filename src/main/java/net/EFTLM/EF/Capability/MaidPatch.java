@@ -3,22 +3,34 @@ package net.EFTLM.EF.Capability;
 import com.github.tartaricacid.touhoulittlemaid.api.entity.IMaid;
 import com.github.tartaricacid.touhoulittlemaid.api.task.IMaidTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import com.google.common.collect.Maps;
+import net.EFTLM.EF.API.Event.MaidChangeItemEvent;
+import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
 import net.EFTLM.EF.Animation.CombatBehavior.*;
-import net.EFTLM.EF.Api.Event.CombatBehaviorsEvent;
+import net.EFTLM.EF.API.Event.CombatBehaviorsEvent;
+import net.EFTLM.EF.Skill.MaidSkill;
+import net.EFTLM.EF.Skill.MaidSkillDataManager;
+import net.EFTLM.EF.Utils.CompoundTagManager;
 import net.EFTLM.TLM.Task.FightModeTask;
-import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.nbt.*;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
@@ -36,22 +48,84 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.EpicFightDamageTypeTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.DodgeLocationIndicator;
+import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 import java.util.*;
-public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
+public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> implements INBTSerializable<CompoundTag> {
+    public static final EntityDataAccessor<Float> Stamina = SynchedEntityData.defineId(EntityMaid.class, EntityDataSerializers.FLOAT);
+    protected static final String DEFAULT_MODEL_ID = "geckolib:winefox";
     protected Map<Item, CombatBehaviors.Builder<HumanoidMobPatch<?>>> ItemAttackMotions;
     protected Map<Item, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> ItemStyleAttackMotions;
     protected Map<Item, HumanoidArmature> ItemArmatures;
-    protected Item CurrentItem;
+    protected Map<MaidSkill, Map<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data>> SkillDataKey = Maps.newHashMap();
+    public Item CurrentMain;
+    public Item CurrentOff;
+    protected List<ResourceLocation> LearnedSkills = new ArrayList<>();
     protected boolean hasFightAi;
-    protected static final String DEFAULT_MODEL_ID = "geckolib:winefox";
     public MaidPatch() {
         super(Factions.NEUTRAL);
+    }
+    public static void initAttribute(EntityAttributeModificationEvent event) {
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.ARMOR_NEGATION.get(), 0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.IMPACT.get(),0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STRIKES.get(),999);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STUN_ARMOR.get(),20);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ATTACK_SPEED.get(), 0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_MAX_STRIKES.get(),0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get(),0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_IMPACT.get(),0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STAMINA.get(),20);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),0.15);
+    }
+    public float getMaxStamina() {
+        AttributeInstance maxStamina = this.getOriginal().getAttribute(EpicFightAttributes.MAX_STAMINA.get());
+        return (float)(maxStamina == null ? 0.0 : maxStamina.getValue() * (this.getFavorRank() + 1));
+    }
+    public float getStamina() {
+        return this.getMaxStamina() <= 0.0F ? 0.0F : this.getOriginal().getEntityData().hasItem(Stamina) ? this.getOriginal().getEntityData().get(Stamina) : 0.0F;
+    }
+    public boolean hasStamina(float amount) {
+        return this.getStamina() >= amount;
+    }
+    public void setStamina(float value) {
+        if (this.getOriginal().getEntityData().hasItem(Stamina)) {
+            float amount = Mth.clamp(value, 0.0F, this.getMaxStamina());
+            this.getOriginal().getEntityData().set(Stamina, amount);
+        }
+    }
+    public List<ResourceLocation> getLearnedSkills() {
+        return this.LearnedSkills;
+    }
+    public void addLearnedSkill(ResourceLocation RegistryName) {
+        if (!this.hasLearnedSkill(RegistryName)) {
+            this.LearnedSkills.add(RegistryName);
+            this.saveToPersistent();
+        }
+    }
+    public void removeLearnedSkill(ResourceLocation RegistryName) {
+        if (this.hasLearnedSkill(RegistryName)) {
+            this.LearnedSkills.remove(RegistryName);
+            this.saveToPersistent();
+        }
+    }
+    public void clearLearnedSkills() {
+        this.LearnedSkills.clear();
+        this.saveToPersistent();
+    }
+    public boolean hasLearnedSkill(ResourceLocation RegistryName) {
+        return this.LearnedSkills.contains(RegistryName);
+    }
+    protected void saveToPersistent() {
+        EntityMaid Maid = this.getOriginal();
+        if (Maid != null && !Maid.level().isClientSide()) {
+            CompoundTag PersistentData = Maid.getPersistentData();
+            PersistentData.remove(CompoundTagManager.MaidCap);
+            PersistentData.put(CompoundTagManager.MaidCap, this.serializeNBT());
+        }
     }
     @Override
     public OpenMatrix4f getModelMatrix(float partialTicks) {
@@ -68,6 +142,24 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
         return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRotO, yRot, partialTicks, 0.8F, 0.8F, 0.8F);
     }
     @Override
+    public void onConstructed(T entity) {
+        super.onConstructed(entity);
+        entity.getEntityData().define(Stamina, 0F);
+    }
+    @Override
+    public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
+        super.onJoinWorld(entity, event);
+        CompoundTag NBT = entity.getPersistentData();
+        if (NBT.contains(CompoundTagManager.MaidCap)) {
+            this.deserializeNBT(NBT);
+        }
+        Item Main = entity.getMainHandItem().getItem();
+        Item Off = entity.getOffhandItem().getItem();
+        this.CurrentMain = Main;
+        this.CurrentOff = Off;
+        MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
+    }
+    @Override
     public HumanoidArmature getArmature() {
         ItemStack ItemStack = this.getOriginal().getMainHandItem();
         if (this.ItemArmatures.containsKey(ItemStack.getItem())) {
@@ -79,17 +171,29 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
     public void serverTick(LivingEvent.LivingTickEvent event) {
         super.serverTick(event);
         if (!this.getOriginal().level().isClientSide()) {
+            float stamina = this.getStamina();
+            float maxStamina = this.getMaxStamina();
+            float staminaRegen = (float) this.getOriginal().getAttributeValue(EpicFightAttributes.STAMINA_REGEN.get());
             if (this.getOriginal().isDeadOrDying()) {
                 this.tickDeath();
             }
+            if (staminaRegen > 0.0F) {
+                if (stamina < maxStamina) {
+                    float staminaFactor = 1.0F + (float)Math.pow(stamina / (maxStamina - stamina * 0.5F), 2.0);
+                    this.setStamina(stamina + maxStamina * 0.01F * staminaFactor * staminaRegen);
+                }
+            }
             if (this.isFightMode()) {
-                ItemStack ItemStack = this.getOriginal().getMainHandItem();
-                if (this.CurrentItem != ItemStack.getItem() || this.isHugByOwner() || this.isSleep() || this.isSit()) {
+                Item Main = this.getOriginal().getMainHandItem().getItem();
+                Item Off = this.getOriginal().getOffhandItem().getItem();
+                if (this.CurrentMain != Main || this.CurrentOff != Off  || this.CheckState()) {
                     this.resetAnimation();
                     this.resetAi();
-                    this.CurrentItem = ItemStack.getItem();
+                    this.CurrentMain = Main;
+                    this.CurrentOff = Off;
+                    MinecraftForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
                 }
-                if (!this.hasFightAi && !isHugByOwner() && !isSleep() && !isSit()) {
+                if (!this.hasFightAi && !this.CheckState()) {
                     this.resetAi();
                 }
             } else {
@@ -108,8 +212,8 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
     }
     @Override
     public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
-        if(target instanceof DodgeLocationIndicator LocationIndicator) {
-            LivingEntityPatch<?> DodgePatch = EpicFightCapabilities.getEntityPatch(LocationIndicator,LivingEntityPatch.class);
+        if (target instanceof DodgeLocationIndicator LocationIndicator) {
+            LivingEntityPatch<?> DodgePatch = EpicFightCapabilities.getEntityPatch(LocationIndicator, LivingEntityPatch.class);
             if (DodgePatch != null && DodgePatch.equals(this.getOwnerPatch())) {
                 return AttackResult.missed(0);
             }
@@ -143,7 +247,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
                 }
             }
         }
-        return super.tryHurt(damageSource,amount);
+        return super.tryHurt(damageSource, amount);
     }
     @Override
     protected void setWeaponMotions() {
@@ -151,8 +255,8 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
         this.ItemAttackMotions = Maps.newHashMap();
         this.ItemStyleAttackMotions = Maps.newHashMap();
         this.weaponAttackMotions = Maps.newHashMap();
-        EFTLM_Behaviors.SetWeaponMotions(this.weaponAttackMotions,this.ItemArmatures);
-        MinecraftForge.EVENT_BUS.post(new CombatBehaviorsEvent(this.weaponAttackMotions,this.ItemStyleAttackMotions,this.ItemAttackMotions,this.ItemArmatures));
+        EFTLM_Behaviors.SetWeaponMotions(this.weaponAttackMotions, this.ItemArmatures);
+        MinecraftForge.EVENT_BUS.post(new CombatBehaviorsEvent(this.weaponAttackMotions, this.ItemStyleAttackMotions, this.ItemAttackMotions, this.ItemArmatures));
     }
     @Override
     protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
@@ -165,7 +269,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
             if (this.ItemStyleAttackMotions.containsKey(ItemStack.getItem())) {
                 Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>> motionByStyle = this.ItemStyleAttackMotions.get(ItemStack.getItem());
                 if (motionByStyle.containsKey(style) || motionByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
-                    return motionByStyle.getOrDefault(style,motionByStyle.get(CapabilityItem.Styles.COMMON));
+                    return motionByStyle.getOrDefault(style, motionByStyle.get(CapabilityItem.Styles.COMMON));
                 }
             } else {
                 if (this.weaponAttackMotions.containsKey(ItemCap.getWeaponCategory())) {
@@ -180,23 +284,14 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
     }
     @Override
     public AnimationManager.AnimationAccessor<? extends StaticAnimation> getHitAnimation(StunType stunType) {
-        if (this.getFavorRank() >= 1) {
-            return switch (stunType) {
-                case LONG, SHORT, HOLD, NONE -> null;
-                case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
-                case NEUTRALIZE -> Animations.BIPED_COMMON_NEUTRALIZED;
-                case FALL -> Animations.BIPED_LANDING;
-            };
-        } else {
-            return switch (stunType) {
-                case LONG -> Animations.BIPED_HIT_LONG;
-                case SHORT, HOLD -> Animations.BIPED_HIT_SHORT;
-                case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
-                case NEUTRALIZE -> Animations.BIPED_COMMON_NEUTRALIZED;
-                case FALL -> Animations.BIPED_LANDING;
-                case NONE -> null;
-            };
-        }
+        return switch (stunType) {
+            case LONG -> Animations.BIPED_HIT_LONG;
+            case SHORT, HOLD -> Animations.BIPED_HIT_SHORT;
+            case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
+            case NEUTRALIZE -> Animations.BIPED_COMMON_NEUTRALIZED;
+            case FALL -> Animations.BIPED_LANDING;
+            case NONE -> null;
+        };
     }
     @Override
     public void initAnimator(Animator animator) {
@@ -220,14 +315,10 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
     @Override
     public void updateMotion(boolean considerInaction) {
     }
-    @Override
-    public boolean shouldCancelKnockback() {
-        return true;
-    }
     protected void tickDeath() {
         this.getOriginal().deathTime++;
         if (this.getOriginal().deathTime >= 20 && !this.getOriginal().isRemoved()) {
-            this.getOriginal().level().broadcastEntityEvent(this.getOriginal(), (byte)60);
+            this.getOriginal().level().broadcastEntityEvent(this.getOriginal(), (byte) 60);
             this.getOriginal().discard();
         }
     }
@@ -254,7 +345,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
             this.getOriginal().goalSelector.removeGoal(wrappedGoal.getGoal());
         }
         if (this.getEntityState().inaction()) {
-            this.playAnimationSynchronized(Animations.BIPED_IDLE,0F);
+            this.playAnimationSynchronized(Animations.BIPED_IDLE, 0F);
         }
     }
     public boolean isHugByOwner() {
@@ -300,21 +391,60 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> {
         return 0;
     }
     public boolean canUseSkill() {
-        return !this.getOriginal().getCooldowns().isOnCooldown(this.CurrentItem);
+        return !this.getOriginal().getCooldowns().isOnCooldown(this.CurrentMain);
     }
     public void setCoolDown(int tick) {
-        this.getOriginal().getCooldowns().addCooldown(this.CurrentItem, tick);
+        this.getOriginal().getCooldowns().addCooldown(this.CurrentMain, tick);
     }
-    public boolean isBlockableSource(DamageSource damageSource) {
-        return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(EpicFightDamageTypeTags.UNBLOCKALBE) && !damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !damageSource.is(DamageTypes.MAGIC) && !damageSource.is(DamageTypeTags.IS_FIRE);
+    public boolean CheckState() {
+        return this.isHugByOwner() || this.isSleep() || this.isSit();
     }
-    public boolean isFrontAttack(DamageSource damageSource) {
-        Vec3 sourceLocation = damageSource.getSourcePosition();
-        Vec3 viewVector = this.getOriginal().getViewVector(1.0F);
-        if (sourceLocation != null) {
-            Vec3 toSourceLocation = sourceLocation.subtract(this.getOriginal().position()).normalize();
-            return toSourceLocation.dot(viewVector) > 0.0;
+    public <V> void registerData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key, V data) {
+        this.registerData(skill,key);
+        this.setData(skill,key,data);
+    }
+    protected  <V> void registerData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key) {
+        this.SkillDataKey.put(skill,Map.of(key,key.getValueType().create()));
+    }
+    public void removeData(MaidSkill skill) {
+        this.SkillDataKey.remove(skill);
+    }
+    public <V> void setData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key, V data) {
+        if (this.hasData(skill,key)) {
+            key.getValueType().set(this.SkillDataKey.get(skill).get(key), data);
         }
-        return false;
+    }
+    public <V> V getDataValue(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key) {
+        return this.hasData(skill,key) ? key.getValueType().get(this.SkillDataKey.get(skill).get(key)) : null;
+    }
+    public boolean hasData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<?> key) {
+        return this.SkillDataKey.get(skill).containsKey(key);
+    }
+    @Override
+    public CompoundTag serializeNBT() {
+        CompoundTag NBT = new CompoundTag();
+        ListTag SkillsList = new ListTag();
+        for (ResourceLocation SkillRegisterId : this.LearnedSkills) {
+            SkillsList.add(StringTag.valueOf(SkillRegisterId.toString()));
+        }
+        NBT.put(CompoundTagManager.LearnedSkills, SkillsList);
+        return NBT;
+    }
+    @Override
+    public void deserializeNBT(CompoundTag NBT) {
+        CompoundTag MaidCap = NBT.getCompound(CompoundTagManager.MaidCap);
+        if (MaidCap.contains(CompoundTagManager.LearnedSkills)) {
+            ListTag SkillsList = MaidCap.getList(CompoundTagManager.LearnedSkills, StringTag.TAG_STRING);
+            this.LearnedSkills = new ArrayList<>();
+            for (int i = 0; i < SkillsList.size(); i++) {
+                this.LearnedSkills.add(ResourceLocation.parse(SkillsList.getString(i)));
+            }
+        } else {
+            ListTag SkillsList = NBT.getList(CompoundTagManager.LearnedSkills, StringTag.TAG_STRING);
+            this.LearnedSkills = new ArrayList<>();
+            for (int i = 0; i < SkillsList.size(); i++) {
+                this.LearnedSkills.add(ResourceLocation.parse(SkillsList.getString(i)));
+            }
+        }
     }
 }

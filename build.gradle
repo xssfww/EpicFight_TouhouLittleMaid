@@ -100,7 +100,7 @@ dependencies {
     implementation fg.deobf("libs:indestructible:1.0.0")
     implementation fg.deobf("maven.modrinth:epic-fight:${epicfight_version}")
     implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:7619938")
-    implementation fg.deobf("curse.maven:touhou-little-maid-355044:7510714")
+    implementation fg.deobf("curse.maven:touhou-little-maid-355044:8061847")
 }
 
 jar {

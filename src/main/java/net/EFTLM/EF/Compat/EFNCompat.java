@@ -6,10 +6,15 @@ import com.hm.efn.entity.effect.SummonedSwordEntity_Out;
 import com.hm.efn.gameasset.animations.EFNClawAnimations;
 import com.hm.efn.registries.EFNItem;
 import com.hm.efn.registries.EFNMobEffectRegistry;
+import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
 import net.EFTLM.EF.Animation.CombatBehavior.EFN.*;
 import net.EFTLM.EF.Animation.CombatBehavior.EFTLM_Behaviors;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
+import net.EFTLM.EF.Skill.MaidSkill;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.BroadBladeSkill;
+import net.EFTLM.EFTLM;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -33,6 +38,11 @@ public class EFNCompat {
     public static void trySetWeaponMotions(Map<Item, CombatBehaviors.Builder<HumanoidMobPatch<?>>> ItemAttackMotions, Map<Item, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> SpecialItemAttackMotions, Map<Item, HumanoidArmature> ItemArmatures) {
         if (CompatModList.LoadedEFN()) {
             Internal.setupWeaponMotions(ItemAttackMotions, SpecialItemAttackMotions, ItemArmatures);
+        }
+    }
+    public static void tryBuildSkills(MaidSkillBuildEvent event) {
+        if (CompatModList.LoadedEFN()) {
+            Internal.setupSkills(event);
         }
     }
     public static void summonFakeMan(LivingEntityPatch<?> Patch, AssetAccessor<? extends StaticAnimation> animation, float transitionTimeModifier) {
@@ -142,6 +152,9 @@ public class EFNCompat {
             ItemArmatures.put(EFNItem.YAMATO_DMC4_IN_SHEATH.get(), Armatures.BIPED.get());
             ItemArmatures.put(EFNItem.HF_MURASAMA.get(), Armatures.BIPED.get());
             ItemArmatures.put(EFNItem.HF_BLADE.get(), Armatures.BIPED.get());
+        }
+        static void setupSkills(MaidSkillBuildEvent event) {
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"board_blade_innate"), BroadBladeSkill::new, MaidSkill.createBuilder(), EFNItem.BROADBLADE.get());
         }
         static boolean isMeenCharging(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {

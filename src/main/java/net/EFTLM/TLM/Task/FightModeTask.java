@@ -1,6 +1,6 @@
 package net.EFTLM.TLM.Task;
 
-import com.github.tartaricacid.touhoulittlemaid.api.task.IMaidTask;
+import com.github.tartaricacid.touhoulittlemaid.api.task.IAttackTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitSounds;
 import com.github.tartaricacid.touhoulittlemaid.util.SoundUtil;
@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-public class FightModeTask implements IMaidTask  {
+public class FightModeTask implements IAttackTask {
     private static final ResourceLocation UUID = ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "fight_mode_task");
     private static final ItemStack ICON = EpicFightItems.SKILLBOOK.get().getDefaultInstance();
     @Override
@@ -49,13 +49,14 @@ public class FightModeTask implements IMaidTask  {
         return Lists.newArrayList(Pair.of(5, supplementedTask), Pair.of(5, findTargetTask), Pair.of(5, moveToTargetTask));
     }
     public Optional<? extends LivingEntity> findFirstValidAttackTarget(EntityMaid maid) {
-        return maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap((mobs) -> mobs.findClosest((e) -> maid.canAttack(e) && maid.isWithinRestriction(e.blockPosition()) && this.canAttack(maid,e)));
+        return maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap((mobs) -> mobs.findClosest((e) ->
+                maid.canAttack(e) && maid.isWithinRestriction(e.blockPosition()) && this.checkAttack(maid,e)));
     }
     @Override
     public @NotNull List<Pair<String, Predicate<EntityMaid>>> getConditionDescription(@NotNull EntityMaid maid) {
         return Lists.newArrayList(Pair.of("assault_weapon", this::hasCapWeapon));
     }
-    public boolean canAttack(EntityMaid maid, @NotNull LivingEntity target) {
+    public boolean checkAttack(EntityMaid maid, @NotNull LivingEntity target) {
         LivingEntity LastAttacker = maid.getLastAttacker();
         if (maid.getOwner() != null) {
             LivingEntity LastHurtByOwner = maid.getOwner().getLastHurtMob();

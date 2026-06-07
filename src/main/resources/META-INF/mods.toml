@@ -5,7 +5,6 @@ license="All Rights Reserved"
 modId="ef_tlm"
 version="1.0.0"
 displayName="史诗战斗：车万女仆"
-credits = "香草冰淇绝绝子-动画包"
 authors="XcS"
 logoFile="LOGO.png"
 description = '''
@@ -44,7 +43,7 @@ side="BOTH"
 [[dependencies.ef_tlm]]
 modId="efn"
 mandatory=false
-versionRange="[3,)"
+versionRange="[3.3,)"
 ordering="AFTER"
 side="BOTH"
 [[dependencies.ef_tlm]]
