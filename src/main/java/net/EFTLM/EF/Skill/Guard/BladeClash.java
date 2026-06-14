@@ -1,4 +1,4 @@
-package net.EFTLM.EF.Skill.Passive;
+package net.EFTLM.EF.Skill.Guard;
 
 import com.github.tartaricacid.touhoulittlemaid.api.event.MaidAttackEvent;
 import com.github.tartaricacid.touhoulittlemaid.api.event.MaidTickEvent;
@@ -28,7 +28,7 @@ public class BladeClash extends MaidSkill {
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.FLOAT);
     public static final MaidSkillDataManager.SkillDataKey<Integer> CLASH_RESTORE_COUNTER =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
-    public BladeClash(MaidSkillBuilder builder) {
+    public BladeClash(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
     }
     @Override
@@ -78,28 +78,27 @@ public class BladeClash extends MaidSkill {
                     if (phaseLevel > 0 && phaseLevel < 3 && this.isFrontAttack(Source,Maid) && this.isBlockableSource(Source)) {
                         float impact = 0.5F;
                         float knockback = 0.1F;
-                        float penalty = 0.1F;
                         if (Source instanceof EpicFightDamageSource EFSource) {
                             impact = EFSource.calculateImpact();
                             knockback += Math.min(impact * 0.1F, 1.0F);
                         }
                         if (MaidPatch.getDataValue(this,CLASH_PENALTY) != null) {
-                            penalty = MaidPatch.getDataValue(this,CLASH_PENALTY);
-                        }
-                        float consumeAmount = penalty * impact;
-                        if (MaidPatch.hasStamina(consumeAmount)) {
-                            if (Source.getSourcePosition() != null) {
-                                MaidPatch.knockBackEntity(Source.getSourcePosition(), knockback);
-                                if (SourcePatch != null) {
-                                    SourcePatch.knockBackEntity(Maid.position(), knockback);
+                            float penalty = MaidPatch.getDataValue(this, CLASH_PENALTY);
+                            float consumeAmount = penalty * impact;
+                            if (MaidPatch.hasStamina(consumeAmount)) {
+                                if (Source.getSourcePosition() != null) {
+                                    MaidPatch.knockBackEntity(Source.getSourcePosition(), knockback);
+                                    if (SourcePatch != null) {
+                                        SourcePatch.knockBackEntity(Maid.position(), knockback);
+                                    }
                                 }
+                                MaidPatch.playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
+                                MaidPatch.setStamina(MaidPatch.getStamina() - consumeAmount);
+                                MaidPatch.setData(this, CLASH_PENALTY, penalty + 0.1F);
+                                MaidPatch.setData(this, CLASH_RESTORE_COUNTER, Maid.tickCount);
+                                EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(Level, HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, Maid, Source.getDirectEntity());
+                                event.setCanceled(true);
                             }
-                            MaidPatch.playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
-                            MaidPatch.setStamina(MaidPatch.getStamina() - consumeAmount);
-                            MaidPatch.setData(this,CLASH_PENALTY,penalty + 0.1F);
-                            MaidPatch.setData(this,CLASH_RESTORE_COUNTER, Maid.tickCount);
-                            EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(Level, HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, Maid, Source.getDirectEntity());
-                            event.setCanceled(true);
                         }
                     }
                 }

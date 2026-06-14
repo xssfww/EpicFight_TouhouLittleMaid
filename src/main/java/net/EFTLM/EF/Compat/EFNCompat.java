@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.guhao.efn_enhance.entity.fakeman.FakeManEntity;
 import com.hm.efn.entity.effect.SummonedSwordEntity_Out;
 import com.hm.efn.gameasset.animations.EFNClawAnimations;
+import com.hm.efn.gameasset.animations.EFNDodgeAnimations;
 import com.hm.efn.registries.EFNItem;
 import com.hm.efn.registries.EFNMobEffectRegistry;
 import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
@@ -11,6 +12,7 @@ import net.EFTLM.EF.Animation.CombatBehavior.EFN.*;
 import net.EFTLM.EF.Animation.CombatBehavior.EFTLM_Behaviors;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
+import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.WeaponInnate.EFN.BroadBladeSkill;
 import net.EFTLM.EFTLM;
@@ -33,6 +35,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import java.util.List;
 import java.util.Map;
 public class EFNCompat {
     public static void trySetWeaponMotions(Map<Item, CombatBehaviors.Builder<HumanoidMobPatch<?>>> ItemAttackMotions, Map<Item, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> SpecialItemAttackMotions, Map<Item, HumanoidArmature> ItemArmatures) {
@@ -43,6 +46,11 @@ public class EFNCompat {
     public static void tryBuildSkills(MaidSkillBuildEvent event) {
         if (CompatModList.LoadedEFN()) {
             Internal.setupSkills(event);
+        }
+    }
+    public static void tryCreateSkills(MaidSkillBuildEvent.SkillCreateEvent<?> event) {
+        if (CompatModList.LoadedEFN()) {
+            Internal.setupCreate(event);
         }
     }
     public static void summonFakeMan(LivingEntityPatch<?> Patch, AssetAccessor<? extends StaticAnimation> animation, float transitionTimeModifier) {
@@ -155,6 +163,61 @@ public class EFNCompat {
         }
         static void setupSkills(MaidSkillBuildEvent event) {
             event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"board_blade_innate"), BroadBladeSkill::new, MaidSkill.createBuilder(), EFNItem.BROADBLADE.get());
+        }
+        static void setupCreate(MaidSkillBuildEvent.SkillCreateEvent<?> event) {
+            if (event.getSkillBuilder() instanceof Step.Builder builder) {
+                builder.addDodgeMotions(EFNItem.YAMATO_DMC_IN_SHEATH.get(),
+                        List.of(EFNDodgeAnimations.YAMATO_STEP_F,EFNDodgeAnimations.YAMATO_STEP_B,
+                                EFNDodgeAnimations.YAMATO_STEP_L,EFNDodgeAnimations.YAMATO_STEP_R));
+                builder.addDodgeMotions(EFNItem.YAMATO_DMC4_IN_SHEATH.get(),
+                        List.of(EFNDodgeAnimations.YAMATO_STEP_F,EFNDodgeAnimations.YAMATO_STEP_B,
+                                EFNDodgeAnimations.YAMATO_STEP_L,EFNDodgeAnimations.YAMATO_STEP_R));
+                builder.addDodgeMotions(EFNItem.KUSABIMARU.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.BROADBLADE.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.CRESCENT_MOON.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.MEEN_SPEAR.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.NF_SHORT_SWORD.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.NF_SHORT_SWORD_2.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.SWORD_OF_PIONEER.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.NF_CLAW.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.RUINSGREATSWORD.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.AETHERIAL_DUSK_DUALSWORD.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.AIR_TACHI.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.CO_TACHI.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.KUSABIMARU.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.HF_MURASAMA.get(),
+                        List.of(EFNDodgeAnimations.MURASAMA_ROLL_F,EFNDodgeAnimations.MURASAMA_ROLL_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.HF_BLADE.get(),
+                        List.of(EFNDodgeAnimations.MURASAMA_ROLL_F,EFNDodgeAnimations.MURASAMA_ROLL_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+            }
         }
         static boolean isMeenCharging(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {

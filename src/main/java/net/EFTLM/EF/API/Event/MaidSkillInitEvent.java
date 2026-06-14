@@ -1,13 +1,9 @@
 package net.EFTLM.EF.API.Event;
 
+import net.EFTLM.EF.API.AbstractMaidEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
-import net.minecraftforge.eventbus.api.Event;
-public class MaidSkillInitEvent extends Event {
-    private final MaidPatch<?> MaidPatch;
+public class MaidSkillInitEvent extends AbstractMaidEvent<MaidPatch<?>> {
     public MaidSkillInitEvent(MaidPatch<?> MaidPatch) {
-        this.MaidPatch = MaidPatch;
-    }
-    public MaidPatch<?> getMaidPatch() {
-        return this.MaidPatch;
+        super(MaidPatch);
     }
 }

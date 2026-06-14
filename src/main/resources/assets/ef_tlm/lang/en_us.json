@@ -1,4 +1,5 @@
 {
+  "itemGroup.eftlm.skills": "EFTLM：Skills",
   "task.ef_tlm.fight_mode_task": "Fight Mode",
   "task.ef_tlm.fight_mode_task.desc": "Now,We have the EpicFight Power.",
   "task.ef_tlm.fight_mode_task.condition.assault_weapon": "Maid need EpicFight's WeaponCapability Weapon",
@@ -8,11 +9,16 @@
   "message.eftlm.remove_maid_skill_success": "Remove %s maids form %s skill",
   "message.eftlm.remove_maid_skill_failure": "No maids available to remove skill",
   "message.eftlm.clear_maid_skill": "Clear %s maids skills",
+  "message.eftlm.learn_skill_failure": "The maid has learned this skill",
+  "message.eftlm.learn_skill_success": "The maid has learned %s!",
   "gui.ef_tlm.button.skill_book": "Skills",
   "gui.ef_tlm.button.skill_book.desc": "Used to View the SkillBooks currently being studied by the Maid",
   "screen.ef_tlm.maid_skill": "Maid's Skill",
+  "item.ef_tlm.skillbook": "Maid's SkillBook",
   "maid_skill.ef_tlm.blade_clash": "BladeClash",
   "maid_skill.ef_tlm.blade_clash.desc": "Defend against enemy attacks with offensive tactics during battles!",
+  "maid_skill.ef_tlm.step": "Step",
+  "maid_skill.ef_tlm.step.desc": "When an enemy attacks, the maid predicts the attack direction and dodges to the opposite side.",
   "maid_skill.ef_tlm.board_blade_innate": "BreakingEdge",
-  "maid_skill.ef_tlm.board_blade_innate.desc": "Bloodbath: Upon killing an enemy, gain speed boost and continuous health regeneration"
+  "maid_skill.ef_tlm.board_blade_innate.desc": "§7Iron Bones: Super armor during attack wind-up§r\n§7Resolve: Damage increased to 1.5x when attack hits only one target§r\n§7Army Breaker: When hitting more than 2 targets, deal additional damage equal to 2% of each target's current health§r\n§7Bloodbath: Upon killing an enemy, gain speed boost and continuous health regeneration§r\n§7Revolution: Attacks have a 30% chance to ignore dodging and blocking; when triggered, deal additional damage equal to 5% of the target's current health§r"
 }

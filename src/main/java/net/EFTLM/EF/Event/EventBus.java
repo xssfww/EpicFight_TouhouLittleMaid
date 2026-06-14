@@ -3,19 +3,19 @@ package net.EFTLM.EF.Event;
 import com.github.tartaricacid.touhoulittlemaid.api.event.*;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
-import net.EFTLM.EF.API.Event.MaidChangeItemEvent;
-import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
-import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
+import net.EFTLM.EF.API.Event.*;
 import net.EFTLM.EF.Animation.EFTLM_Animations;
 import net.EFTLM.EF.Animation.EFTLM_LivingMotions;
-import net.EFTLM.EF.API.Event.CombatBehaviorsEvent;
 import net.EFTLM.EF.Capability.ClientMaidPatch;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.EFNCompat;
+import net.EFTLM.EF.Item.MaidSkillBookItem;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
+import net.EFTLM.EF.Register.EFTLM_Tab;
+import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillManager;
-import net.EFTLM.EF.Skill.Passive.BladeClash;
+import net.EFTLM.EF.Skill.Guard.BladeClash;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.EFTLM.EF.Utils.CompoundTagManager;
 import net.EFTLM.EFTLM;
@@ -23,11 +23,16 @@ import net.EFTLM.TLM.Task.FightModeTask;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -36,7 +41,6 @@ import yesman.epicfight.api.forgeevent.EntityPatchRegistryEvent;
 import yesman.epicfight.api.forgeevent.InitAnimatorEvent;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-
 import java.util.ArrayList;
 import java.util.List;
 public class EventBus {
@@ -54,6 +58,57 @@ public class EventBus {
                 animator.addLivingAnimation(EFTLM_LivingMotions.HUG_WALK, EFTLM_Animations.Biped_Hug_Walk);
                 animator.addLivingAnimation(EFTLM_LivingMotions.HUG_RUN, EFTLM_Animations.Biped_Hug_Run);
                 animator.addLivingAnimation(EFTLM_LivingMotions.HUG_SNEAK, EFTLM_Animations.Biped_Hug_Sneak);
+            }
+        }
+        @SubscribeEvent
+        public static void MaidKilledListener(LivingDeathEvent event) {
+            if (!(event.getEntity().level() instanceof ServerLevel)) return;
+            if (event.getSource().getEntity() instanceof EntityMaid Maid) {
+                MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(Maid, MaidPatch.class);
+                if (MaidPatch != null) {
+                    MinecraftForge.EVENT_BUS.post(new MaidKilledEvent(MaidPatch, event.getEntity(), event.getSource()));
+                }
+            }
+        }
+        @SubscribeEvent
+        public static void MaidHurtListener(LivingHurtEvent event) {
+            if (!(event.getEntity().level() instanceof ServerLevel)) return;
+            if (event.getSource().getEntity() instanceof EntityMaid maid) {
+                MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
+                if (MaidPatch != null) {
+                    MaidHurtTargetEvent.Pre Pre = new MaidHurtTargetEvent.Pre(MaidPatch, event.getEntity(), event.getSource());
+                    MinecraftForge.EVENT_BUS.post(Pre);
+                    if (Pre.isCanceled()) {
+                        event.setCanceled(true);
+                        return;
+                    }
+                    MinecraftForge.EVENT_BUS.post(new MaidHurtTargetEvent.Post(MaidPatch, event.getEntity(), event.getSource()));
+                }
+            }
+        }
+        @SubscribeEvent
+        public static void MaidInteract(InteractMaidEvent event) {
+            EntityMaid Maid = event.getMaid();
+            ItemStack stack = event.getStack();
+            if (stack.getItem() instanceof MaidSkillBookItem) {
+                if (Maid.level() instanceof ServerLevel) {
+                    MaidSkill Skill = MaidSkillBookItem.getContainSkill(stack);
+                    if (Skill != null) {
+                        MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(Maid, MaidPatch.class);
+                        if (MaidPatch != null) {
+                            if (MaidPatch.hasLearnedSkill(Skill.getRegistryName())) {
+                                event.getPlayer().displayClientMessage(Component.translatable("message.eftlm.learn_skill_failure"),true);
+                                event.setCanceled(true);
+                            } else {
+                                MaidPatch.addLearnedSkill(Skill.getRegistryName());
+                                MaidPatch.playSound(SoundEvents.PLAYER_LEVELUP, -0.05F, 0.1F);
+                                event.getPlayer().displayClientMessage(Component.translatable("message.eftlm.learn_skill_success", Skill.getTitle()),true);
+                                stack.setCount(0);
+                                event.setCanceled(true);
+                            }
+                        }
+                    }
+                }
             }
         }
         @SubscribeEvent
@@ -166,8 +221,8 @@ public class EventBus {
             }
         }
         @SubscribeEvent
-        public void MaidHurtTargetPost(MaidHurtTarget.Post event) {
-            MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
+        public void MaidHurtTargetPost(MaidHurtTargetEvent.Post event) {
+            MaidPatch<?> MaidPatch = event.getMaidPatch();
             if (MaidPatch != null) {
                 List<ResourceLocation> Skills = MaidPatch.getLearnedSkills();
                 Skills.forEach(RL -> {
@@ -181,8 +236,8 @@ public class EventBus {
             }
         }
         @SubscribeEvent
-        public void MaidHurtTargetPre(MaidHurtTarget.Pre event) {
-            MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
+        public void MaidHurtTargetPre(MaidHurtTargetEvent.Pre event) {
+            MaidPatch<?> MaidPatch = event.getMaidPatch();
             if (MaidPatch != null) {
                 List<ResourceLocation> Skills = MaidPatch.getLearnedSkills();
                 Skills.forEach(RL -> {
@@ -243,10 +298,9 @@ public class EventBus {
                             skill.onInit(event);
                         }
                     }
-                    Item item = MaidPatch.CurrentMain;
-                    if (item != null) {
-                        if (MaidSkillManager.hasSkillFor(item)) {
-                            toAdd.add(MaidSkillManager.getSkillFor(item).getRegistryName());
+                    if (MaidPatch.CurrentMain != null) {
+                        if (MaidSkillManager.hasSkillFor(MaidPatch.CurrentMain)) {
+                            toAdd.add(MaidSkillManager.getSkillFor(MaidPatch.CurrentMain).getRegistryName());
                         }
                     }
                     for (ResourceLocation rl : toAdd) {
@@ -256,20 +310,18 @@ public class EventBus {
             }
         }
         @SubscribeEvent
-        public static void MaidKillTarget(LivingDeathEvent event) {
-            if (event.getSource().getEntity() instanceof EntityMaid Maid) {
-                MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(Maid, MaidPatch.class);
-                if (MaidPatch != null) {
-                    List<ResourceLocation> Skills = MaidPatch.getLearnedSkills();
-                    Skills.forEach(RL -> {
-                        MaidSkill Skill = MaidSkillManager.getSkillFor(RL);
-                        if (Skill != null) {
-                            if (Skill.canExecute(MaidPatch)) {
-                                Skill.MaidKillTarget(event);
-                            }
+        public static void MaidKillTarget(MaidKilledEvent event) {
+            MaidPatch<?> MaidPatch = event.getMaidPatch();
+            if (MaidPatch != null) {
+                List<ResourceLocation> Skills = MaidPatch.getLearnedSkills();
+                Skills.forEach(RL -> {
+                    MaidSkill Skill = MaidSkillManager.getSkillFor(RL);
+                    if (Skill != null) {
+                        if (Skill.canExecute(MaidPatch)) {
+                            Skill.MaidKillTarget(event);
                         }
-                    });
-                }
+                    }
+                });
             }
         }
         @SubscribeEvent
@@ -298,8 +350,13 @@ public class EventBus {
         }
         @SubscribeEvent
         public static void MaidSkillBuild(MaidSkillBuildEvent event) {
-            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"blade_clash"), BladeClash::new, BladeClash.createBuilder());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"blade_clash"), BladeClash::new, BladeClash.createBuilder().setCreativeTab(EFTLM_Tab.SKILL.get()));
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"step"), Step::new, Step.createStepBuilder().setCreativeTab(EFTLM_Tab.SKILL.get()));
             EFNCompat.tryBuildSkills(event);
+        }
+        @SubscribeEvent
+        public static void MaidSkillCreate(MaidSkillBuildEvent.SkillCreateEvent<?> event) {
+            EFNCompat.tryCreateSkills(event);
         }
         @SubscribeEvent
         public static void CommonSetup(FMLCommonSetupEvent event) {

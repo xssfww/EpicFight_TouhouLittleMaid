@@ -79,11 +79,11 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get(),0);
         event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_IMPACT.get(),0);
         event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STAMINA.get(),20);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),0.15);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),0.5);
     }
     public float getMaxStamina() {
         AttributeInstance maxStamina = this.getOriginal().getAttribute(EpicFightAttributes.MAX_STAMINA.get());
-        return (float)(maxStamina == null ? 0.0 : maxStamina.getValue() * (this.getFavorRank() + 1));
+        return (float)(maxStamina == null ? 0.0 : maxStamina.getValue());
     }
     public float getStamina() {
         return this.getMaxStamina() <= 0.0F ? 0.0F : this.getOriginal().getEntityData().hasItem(Stamina) ? this.getOriginal().getEntityData().get(Stamina) : 0.0F;
@@ -104,6 +104,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         if (!this.hasLearnedSkill(RegistryName)) {
             this.LearnedSkills.add(RegistryName);
             this.saveToPersistent();
+            MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
         }
     }
     public void removeLearnedSkill(ResourceLocation RegistryName) {
@@ -177,7 +178,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
             if (this.getOriginal().isDeadOrDying()) {
                 this.tickDeath();
             }
-            if (staminaRegen > 0.0F) {
+            if (staminaRegen > 0.0F && !this.getEntityState().inaction()) {
                 if (stamina < maxStamina) {
                     float staminaFactor = 1.0F + (float)Math.pow(stamina / (maxStamina - stamina * 0.5F), 2.0);
                     this.setStamina(stamina + maxStamina * 0.01F * staminaFactor * staminaRegen);
@@ -186,7 +187,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
             if (this.isFightMode()) {
                 Item Main = this.getOriginal().getMainHandItem().getItem();
                 Item Off = this.getOriginal().getOffhandItem().getItem();
-                if (this.CurrentMain != Main || this.CurrentOff != Off  || this.CheckState()) {
+                if (this.CurrentMain != Main || this.CurrentOff != Off || this.CheckState()) {
                     this.resetAnimation();
                     this.resetAi();
                     this.CurrentMain = Main;
@@ -203,11 +204,19 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
     }
     @Override
     protected void initAI() {
-        if (!isHugByOwner() && !isSleep() && !isSit()) {
+        if (!CheckState()) {
             super.initAI();
             this.hasFightAi = true;
         } else {
             this.hasFightAi = false;
+        }
+    }
+    @Override
+    public void setAIAsInfantry(boolean holdingRanedWeapon) {
+        CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
+        if (builder != null) {
+            this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+            this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.0, true));
         }
     }
     @Override
@@ -400,11 +409,10 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         return this.isHugByOwner() || this.isSleep() || this.isSit();
     }
     public <V> void registerData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key, V data) {
-        this.registerData(skill,key);
-        this.setData(skill,key,data);
-    }
-    protected  <V> void registerData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<V> key) {
-        this.SkillDataKey.put(skill,Map.of(key,key.getValueType().create()));
+        Map<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data> inner = this.SkillDataKey.computeIfAbsent(skill, k -> new HashMap<>());
+        MaidSkillDataManager.Data Container = key.getValueType().create();
+        key.getValueType().set(Container, data);
+        inner.put(key, Container);
     }
     public void removeData(MaidSkill skill) {
         this.SkillDataKey.remove(skill);
@@ -418,7 +426,8 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         return this.hasData(skill,key) ? key.getValueType().get(this.SkillDataKey.get(skill).get(key)) : null;
     }
     public boolean hasData(MaidSkill skill, MaidSkillDataManager.SkillDataKey<?> key) {
-        return this.SkillDataKey.get(skill).containsKey(key);
+        Map<MaidSkillDataManager.SkillDataKey<?>, ?> inner = this.SkillDataKey.get(skill);
+        return inner != null && inner.containsKey(key);
     }
     @Override
     public CompoundTag serializeNBT() {

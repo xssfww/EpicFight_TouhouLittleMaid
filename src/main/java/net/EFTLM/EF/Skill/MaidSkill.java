@@ -4,18 +4,18 @@ import com.github.tartaricacid.touhoulittlemaid.api.event.*;
 import net.EFTLM.EF.API.Event.*;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 public abstract class MaidSkill {
     protected final ResourceLocation registryName;
     protected final CreativeModeTab creativeTab;
-    public MaidSkill(MaidSkillBuilder builder) {
+    public MaidSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         this.registryName = builder.registryName;
         this.creativeTab = builder.tab;
     }
-    public static MaidSkillBuilder createBuilder() {
-        return new MaidSkillBuilder();
+    public static MaidSkillBuilder<MaidSkill> createBuilder() {
+        return new MaidSkillBuilder<>();
     }
     public void MaidTick(MaidTickEvent event) {
     }
@@ -27,11 +27,11 @@ public abstract class MaidSkill {
     }
     public void MaidDeath(MaidDeathEvent event) {
     }
-    public void MaidHurtTargetPost(MaidHurtTarget.Post event) {
+    public void MaidHurtTargetPost(MaidHurtTargetEvent.Post event) {
     }
-    public void MaidHurtTargetPre(MaidHurtTarget.Pre event) {
+    public void MaidHurtTargetPre(MaidHurtTargetEvent.Pre event) {
     }
-    public void MaidKillTarget(LivingDeathEvent event) {
+    public void MaidKillTarget(MaidKilledEvent event) {
     }
     public void MaidChangeItemOnHand(MaidChangeItemEvent event) {
     }
@@ -43,10 +43,13 @@ public abstract class MaidSkill {
     public ResourceLocation getRegistryName() {
         return this.registryName;
     }
-    public Component getTitle() {
+    public CreativeModeTab getCreativeTab() {
+        return this.creativeTab;
+    }
+    public MutableComponent getTitle() {
         return Component.translatable(String.format("maid_skill.%s.%s", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
     }
-    public Component getDesc() {
+    public MutableComponent getDesc() {
         return Component.translatable(String.format("maid_skill.%s.%s.desc", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
     }
     public ResourceLocation getIcon() {

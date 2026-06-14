@@ -3,7 +3,6 @@ package net.EFTLM.EF.Command;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillManager;
@@ -15,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import java.util.Set;
@@ -70,7 +68,6 @@ public class MaidSkillCommand {
                                     if (MaidPatch != null) {
                                         if (!MaidPatch.hasLearnedSkill(name)) {
                                             MaidPatch.addLearnedSkill(name);
-                                            MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(MaidPatch));
                                             count++;
                                         }
                                     }
@@ -138,9 +135,9 @@ public class MaidSkillCommand {
                                             MaidPatch.removeData(Skill);
                                         }
                                     }
-                                    count++;
                                 }
                                 MaidPatch.clearLearnedSkills();
+                                count++;
                             }
                         }
                     }
