@@ -79,7 +79,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get(),0);
         event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_IMPACT.get(),0);
         event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STAMINA.get(),20);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),0.5);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),1);
     }
     public float getMaxStamina() {
         AttributeInstance maxStamina = this.getOriginal().getAttribute(EpicFightAttributes.MAX_STAMINA.get());

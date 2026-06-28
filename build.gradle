@@ -18,14 +18,13 @@ plugins {
 apply plugin: 'org.spongepowered.mixin'
 
 group = mod_group_id
-version = mod_version
 
 ext {
     mod_disname = "[史诗战斗：车万女仆]"
 }
 
 base {
-    archivesName = "${mod_disname}${mod_name}-${minecraft_version}"
+    archivesName = "${mod_disname}${mod_name}-${minecraft_version}-${mod_version}"
 }
 
 java {
@@ -95,9 +94,12 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("libs:EpicFight-Nightfall:1.0.0")
+    implementation fg.deobf("libs:VIX:1.0.0")
     implementation fg.deobf("libs:Fancy-Trail:1.0.0")
     implementation fg.deobf("libs:Nightfall-Enhance:1.0.0")
     implementation fg.deobf("libs:indestructible:1.0.0")
+    implementation fg.deobf("libs:ef_skin:1.0.0")
+    implementation fg.deobf("libs:ef_anim_phy:1.0.0")
     implementation fg.deobf("maven.modrinth:epic-fight:${epicfight_version}")
     implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:7619938")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:8061847")

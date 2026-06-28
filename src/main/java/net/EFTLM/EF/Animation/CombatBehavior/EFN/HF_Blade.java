@@ -1,8 +1,11 @@
 package net.EFTLM.EF.Animation.CombatBehavior.EFN;
 
 import com.hm.efn.gameasset.animations.EFNHfBladeAnimations;
-import com.hm.efn.gameasset.animations.EFNZansetsuAnimations_B;
+import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.CompatModList;
+import net.EFTLM.EF.Skill.MaidSkillManager;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_BladeSkill;
+import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 public class HF_Blade {
@@ -51,14 +54,6 @@ public class HF_Blade {
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_DASH_Y_SP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_XY_CHARGE)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
                                             .animationBehavior(EFNHfBladeAnimations.HF_BLADE_X_AIR)
                                             .withinDistance(0.0D, 2.0D))
                             .nextBehavior(
@@ -67,99 +62,34 @@ public class HF_Blade {
                                             .withinDistance(0.0D, 2.0D))
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_Y_CHARGE_AIR)
-                                            .withinDistance(0.0D, 2.0D))
+                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_Y_CHARGE_THROUGH)
+                                            .withinDistance(0.0D, 4.0D))
                     )
                     .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                            .cooldown(400)
+                            .cooldown(20)
+                            .weight(100.0F)
+                            .canBeInterrupted(false)
+                            .looping(false)
+                            .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                    .animationBehavior(EFNHfBladeAnimations.HF_BLADE_Y_CHARGE_THROUGH)
+                                    .withinDistance(2.0D, 4.0D))
+                    )
+                    .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
+                            .cooldown(300)
                             .weight(100.0F)
                             .canBeInterrupted(false)
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_DASH_Y_SP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_XY_CHARGE)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_LR_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_LR_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_RL_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_RL_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_LR_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_LR_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_RL_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_RL_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_ZANDATSU_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                    )
-                    .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                            .cooldown(400)
-                            .weight(100.0F)
-                            .canBeInterrupted(false)
-                            .looping(false)
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_LR_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_LR_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_RL_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_DIAGONAL_RL_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_LR_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_LR_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_RL_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations_B.HF_BLADE_SLASH_HORIZONTAL_RL_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNHfBladeAnimations.HF_BLADE_ZANDATSU)
+                                            .behavior(patch -> {
+                                                if (patch instanceof MaidPatch<?> maid) {
+                                                    for (ResourceLocation RL : maid.getLearnedSkills()) {
+                                                        if (MaidSkillManager.getSkillFor(RL) instanceof HF_BladeSkill blade) {
+                                                            maid.setData(blade, HF_BladeSkill.isZansetsu_Blade,true);
+                                                        }
+                                                    }
+                                                }
+                                            })
                                             .withinDistance(0.0D, 2.0D))
                     );
         }

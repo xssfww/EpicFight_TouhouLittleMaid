@@ -20,5 +20,9 @@
   "maid_skill.ef_tlm.step": "Step",
   "maid_skill.ef_tlm.step.desc": "When an enemy attacks, the maid predicts the attack direction and dodges to the opposite side.",
   "maid_skill.ef_tlm.board_blade_innate": "BreakingEdge",
-  "maid_skill.ef_tlm.board_blade_innate.desc": "§7Iron Bones: Super armor during attack wind-up§r\n§7Resolve: Damage increased to 1.5x when attack hits only one target§r\n§7Army Breaker: When hitting more than 2 targets, deal additional damage equal to 2% of each target's current health§r\n§7Bloodbath: Upon killing an enemy, gain speed boost and continuous health regeneration§r\n§7Revolution: Attacks have a 30% chance to ignore dodging and blocking; when triggered, deal additional damage equal to 5% of the target's current health§r"
+  "maid_skill.ef_tlm.board_blade_innate.desc": "§7Iron Bones: Super armor during attack wind-up§r\n§7Resolve: Damage increased to 1.5x when attack hits only one target§r\n§7Army Breaker: When hitting more than 2 targets, deal additional damage equal to 2% of each target's current health§r\n§7Bloodbath: Upon killing an enemy, gain speed boost and continuous health regeneration§r\n§7Revolution: Attacks have a 30% chance to ignore dodging and blocking; when triggered, deal additional damage equal to 5% of the target's current health§r",
+  "maid_skill.ef_tlm.hf_murasama_innate": "BLADE-MODE",
+  "maid_skill.ef_tlm.hf_murasama_innate.desc": "The mountains don't give back what they take...",
+  "maid_skill.ef_tlm.hf_blade_innate": "BLADE-MODE",
+  "maid_skill.ef_tlm.hf_blade_innate.desc": "This is not my sword..."
 }

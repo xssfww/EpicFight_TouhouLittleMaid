@@ -1,8 +1,11 @@
 package net.EFTLM.EF.Animation.CombatBehavior.EFN;
 
 import com.hm.efn.gameasset.animations.EFNMurasamaAnimations;
-import com.hm.efn.gameasset.animations.EFNZansetsuAnimations;
+import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.CompatModList;
+import net.EFTLM.EF.Skill.MaidSkillManager;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_MurasamaSkill;
+import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 public class HF_Murasama {
@@ -51,14 +54,6 @@ public class HF_Murasama {
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_DASH_Y_SP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_XY_CHARGE)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
                                             .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_X_AIR)
                                             .withinDistance(0.0D, 2.0D))
                             .nextBehavior(
@@ -67,103 +62,34 @@ public class HF_Murasama {
                                             .withinDistance(0.0D, 2.0D))
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_Y_CHARGE_AIR)
-                                            .withinDistance(0.0D, 2.0D))
+                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_Y_CHARGE_THROUGH)
+                                            .withinDistance(0.0D, 4.0D))
                     )
                     .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                            .cooldown(400)
+                            .cooldown(20)
+                            .weight(100.0F)
+                            .canBeInterrupted(false)
+                            .looping(false)
+                            .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                    .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_Y_CHARGE_THROUGH)
+                                    .withinDistance(2.0D, 4.0D))
+                    )
+                    .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
+                            .cooldown(300)
                             .weight(100.0F)
                             .canBeInterrupted(false)
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_DASH_Y_SP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_XY_CHARGE)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_LR_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_LR_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_RL_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_RL_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_LR_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_LR_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_RL_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_RL_DOWN_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_LR_UP_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_ZANDATSU_AIR)
-                                            .withinDistance(0.0D, 2.0D))
-                    )
-                    .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                            .cooldown(400)
-                            .weight(100.0F)
-                            .canBeInterrupted(false)
-                            .looping(false)
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_LR_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_LR_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_RL_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_DIAGONAL_RL_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_LR_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_LR_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_RL_UP)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNZansetsuAnimations.HF_MURASAMA_SLASH_HORIZONTAL_RL_DOWN)
-                                            .withinDistance(0.0D, 2.0D))
-                            .nextBehavior(
-                                    CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .animationBehavior(EFNMurasamaAnimations.HF_MURASAMA_ZANDATSU)
+                                            .behavior(patch -> {
+                                                if (patch instanceof MaidPatch<?> maid) {
+                                                    for (ResourceLocation RL : maid.getLearnedSkills()) {
+                                                        if (MaidSkillManager.getSkillFor(RL) instanceof HF_MurasamaSkill murasama) {
+                                                            maid.setData(murasama, HF_MurasamaSkill.isZansetsu,true);
+                                                        }
+                                                    }
+                                                }
+                                            })
                                             .withinDistance(0.0D, 2.0D))
                     );
         }

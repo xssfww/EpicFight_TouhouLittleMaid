@@ -38,7 +38,7 @@ public abstract class MaidSkill {
     public void onInit(MaidSkillInitEvent event) {
     }
     public boolean canExecute(MaidPatch<?> MaidPatch) {
-        return true;
+        return MaidPatch.isFightMode();
     }
     public ResourceLocation getRegistryName() {
         return this.registryName;

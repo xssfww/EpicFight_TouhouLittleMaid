@@ -15,6 +15,8 @@ import net.EFTLM.EF.Model.EFTLM_Armatures;
 import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.WeaponInnate.EFN.BroadBladeSkill;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_BladeSkill;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_MurasamaSkill;
 import net.EFTLM.EFTLM;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -149,6 +151,7 @@ public class EFNCompat {
             ItemAttackMotions.put(EFNItem.NF_SHORT_SWORD.get(), ShortSword.Instance);
             ItemAttackMotions.put(EFNItem.NF_SHORT_SWORD_2.get(), ShortSword.Instance);
             ItemAttackMotions.put(EFNItem.CRIMSON_MOON.get(), Scythe.Instance);
+            ItemAttackMotions.put(EFNItem.CRESCENT_MOON.get(), Crescent.Instance);
             SpecialItemAttackMotions.put(EFNItem.EXSILIUMGLADIUS.get(), ImmutableMap.of(
                     CapabilityItem.Styles.ONE_HAND, EFTLM_Behaviors.Sword_OneHand,
                     CapabilityItem.Styles.TWO_HAND, Exsiliumgladius.Instance)
@@ -163,6 +166,8 @@ public class EFNCompat {
         }
         static void setupSkills(MaidSkillBuildEvent event) {
             event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"board_blade_innate"), BroadBladeSkill::new, MaidSkill.createBuilder(), EFNItem.BROADBLADE.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_murasama_innate"), HF_MurasamaSkill::new, MaidSkill.createBuilder(), EFNItem.HF_MURASAMA.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_blade_innate"), HF_BladeSkill::new, MaidSkill.createBuilder(), EFNItem.HF_BLADE.get());
         }
         static void setupCreate(MaidSkillBuildEvent.SkillCreateEvent<?> event) {
             if (event.getSkillBuilder() instanceof Step.Builder builder) {
@@ -206,6 +211,9 @@ public class EFNCompat {
                         List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
                                 EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
                 builder.addDodgeMotions(EFNItem.CO_TACHI.get(),
+                        List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
+                                EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
+                builder.addDodgeMotions(EFNItem.EXSILIUMGLADIUS.get(),
                         List.of(EFNDodgeAnimations.DODGE_STEP_F,EFNDodgeAnimations.DODGE_STEP_B,
                                 EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
                 builder.addDodgeMotions(EFNItem.KUSABIMARU.get(),

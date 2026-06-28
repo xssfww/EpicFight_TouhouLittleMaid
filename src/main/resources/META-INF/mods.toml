@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="All Rights Reserved"
 [[mods]]
 modId="ef_tlm"
-version="1.1.0"
+version="1.1.1"
 displayName="史诗战斗：车万女仆"
 authors="XcS"
 logoFile="LOGO.png"
@@ -48,12 +48,6 @@ ordering="AFTER"
 side="BOTH"
 [[dependencies.ef_tlm]]
 modId="efn_enhance"
-mandatory=false
-versionRange="[1,)"
-ordering="AFTER"
-side="BOTH"
-[[dependencies.ef_tlm]]
-modId="fancy_trail"
 mandatory=false
 versionRange="[1,)"
 ordering="AFTER"

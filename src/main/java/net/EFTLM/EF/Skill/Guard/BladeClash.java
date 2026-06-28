@@ -45,7 +45,6 @@ public class BladeClash extends MaidSkill {
             if (MaidPatch != null) {
                 if (MaidPatch.getDataValue(this,CLASH_RESTORE_COUNTER) != null) {
                     int Counter = MaidPatch.getDataValue(this,CLASH_RESTORE_COUNTER);
-                    MaidPatch.setData(this, CLASH_RESTORE_COUNTER, Counter + 1);
                     if (MaidPatch.getDataValue(this,CLASH_PENALTY) != null) {
                         float Penalty = MaidPatch.getDataValue(this,CLASH_PENALTY);
                         if (Penalty > 0.0F) {

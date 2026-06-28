@@ -19,6 +19,8 @@
       "Shoulder_L",
       "Arm_L",
       "Hand_L",
+      "Tool_L",
+      "Elbow_L",
       "a",
       "b",
       "c",
@@ -26,9 +28,7 @@
       "e",
       "f",
       "g",
-      "h",
-      "Tool_L",
-      "Elbow_L"
+      "h"
     ],
     "hierarchy": [
       {
