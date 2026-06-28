@@ -13,10 +13,10 @@ import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.server.level.ServerLevel;
-import org.apache.commons.compress.utils.Lists;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import java.util.List;
+import com.google.common.collect.Lists;
 public class HF_BladeSkill extends WeaponInnateSkill {
     public static List<AnimationManager.AnimationAccessor<? extends AvalonAttackAnimation>> BladeZansetsuList = Lists.newArrayList();
     public static final MaidSkillDataManager.SkillDataKey<Boolean> isZansetsu_Blade =
