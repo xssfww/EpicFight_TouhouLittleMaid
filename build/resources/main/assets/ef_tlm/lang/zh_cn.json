@@ -20,5 +20,9 @@
   "maid_skill.ef_tlm.step": "灵动步伐",
   "maid_skill.ef_tlm.step.desc": "当附近的敌人进入攻击架势或释放攻击时，女仆会瞬间判断攻击的来向，并向相反方向灵活闪避\n\n§L§8狗修金看着呢，怎能被这种攻击打中？",
   "maid_skill.ef_tlm.board_blade_innate": "破锋",
-  "maid_skill.ef_tlm.board_blade_innate.desc": "§7铁骨: 攻击前摇霸体§r\n§7决意：攻击只命中一个目标时，伤害提升至1.5倍§r\n§7破军: 命中目标数量大于2时，对命中目标附加其当前生命值百分之二的额外伤害§r\n§7浴血: 造成击杀后获得速度加成并持续恢复生命§r\n§7革命: 攻击时有百分之30的几率无视闪避防御，触发时额外对目标给予当前生命值百分之五的额外伤害§r"
+  "maid_skill.ef_tlm.board_blade_innate.desc": "§7铁骨: 攻击前摇霸体§r\n§7决意：攻击只命中一个目标时，伤害提升至1.5倍§r\n§7破军: 命中目标数量大于2时，对命中目标附加其当前生命值百分之二的额外伤害§r\n§7浴血: 造成击杀后获得速度加成并持续恢复生命§r\n§7革命: 攻击时有百分之30的几率无视闪避防御，触发时额外对目标给予当前生命值百分之五的额外伤害§r",
+  "maid_skill.ef_tlm.hf_murasama_innate": "斩切模式",
+  "maid_skill.ef_tlm.hf_murasama_innate.desc": "高山不会归还所得的一切...",
+  "maid_skill.ef_tlm.hf_blade_innate": "斩切模式",
+  "maid_skill.ef_tlm.hf_blade_innate.desc": "这也并非是我的刀..."
 }
