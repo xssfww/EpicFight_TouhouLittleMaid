@@ -67,10 +67,10 @@ public class Scythe {
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .custom(BehaviorsBuild::canUseSkill)
+                                            .custom(Patch -> BehaviorsBuild.hasStack(Patch,12))
                                             .behavior(Patch -> {
-                                                Patch.playAnimationSynchronized(EFNScytheAnimations.SCYTHE_SCARLET_END,0F);
-                                                BehaviorsBuild.setCoolDown(Patch, 1200);
+                                                Patch.playAnimationSynchronized(EFNScytheAnimations.SCYTHE_SCARLET_END, 0F);
+                                                BehaviorsBuild.setStack(Patch,0);
                                             })
                                             .withinDistance(0.0D, 24.0D))
                     );

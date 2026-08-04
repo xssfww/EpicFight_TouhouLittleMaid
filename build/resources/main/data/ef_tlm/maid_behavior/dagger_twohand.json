@@ -1,0 +1,72 @@
+{
+  "weapon_categories": ["dagger"],
+  "style": "two_hand",
+  "combat_behaviors": [
+    {
+      "weight": 1.0,
+      "cooldown": 0,
+      "canBeInterrupted": true,
+      "looping": false,
+      "behaviors": [
+        {
+          "animation": "epicfight:biped/combat/dagger_dual_auto1",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0,
+              "max": 1.5
+            }
+          ]
+        },
+        {
+          "animation": "epicfight:biped/combat/dagger_dual_auto2",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0,
+              "max": 1.5
+            }
+          ]
+        },
+        {
+          "animation": "epicfight:biped/combat/dagger_dual_auto3",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0,
+              "max": 1.5
+            }
+          ]
+        },
+        {
+          "animation": "epicfight:biped/combat/dagger_dual_auto4",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0,
+              "max": 1.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 0.6,
+      "cooldown": 30,
+      "canBeInterrupted": false,
+      "looping": false,
+      "behaviors": [
+        {
+          "animation": "epicfight:biped/combat/dagger_dual_dash",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 7.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

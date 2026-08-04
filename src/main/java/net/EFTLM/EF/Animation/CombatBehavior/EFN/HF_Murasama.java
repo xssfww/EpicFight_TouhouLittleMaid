@@ -1,11 +1,9 @@
 package net.EFTLM.EF.Animation.CombatBehavior.EFN;
 
 import com.hm.efn.gameasset.animations.EFNMurasamaAnimations;
-import net.EFTLM.EF.Capability.MaidPatch;
+import net.EFTLM.EF.Animation.CombatBehavior.BehaviorsBuild;
 import net.EFTLM.EF.Compat.CompatModList;
-import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_MurasamaSkill;
-import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 public class HF_Murasama {
@@ -75,20 +73,18 @@ public class HF_Murasama {
                                     .withinDistance(2.0D, 4.0D))
                     )
                     .newBehaviorSeries(CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                            .cooldown(300)
-                            .weight(100.0F)
+                            .cooldown(20)
+                            .weight(150.0F)
                             .canBeInterrupted(false)
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                            .custom(patch -> BehaviorsBuild.hasStack(patch,2))
                                             .behavior(patch -> {
-                                                if (patch instanceof MaidPatch<?> maid) {
-                                                    for (ResourceLocation RL : maid.getLearnedSkills()) {
-                                                        if (MaidSkillManager.getSkillFor(RL) instanceof HF_MurasamaSkill murasama) {
-                                                            maid.setData(murasama, HF_MurasamaSkill.isZansetsu,true);
-                                                        }
-                                                    }
-                                                }
+                                                HF_MurasamaSkill skill = BehaviorsBuild.getWeaponInnateSkill(patch, HF_MurasamaSkill.class);
+                                                if (skill == null) return;
+                                                BehaviorsBuild.setData(patch,skill,HF_MurasamaSkill.isZansetsu,true);
+                                                BehaviorsBuild.setStack(patch, BehaviorsBuild.getStack(patch) - 2);
                                             })
                                             .withinDistance(0.0D, 2.0D))
                     );

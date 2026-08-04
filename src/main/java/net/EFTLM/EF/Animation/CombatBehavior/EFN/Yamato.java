@@ -1,7 +1,6 @@
 package net.EFTLM.EF.Animation.CombatBehavior.EFN;
 
 import com.hm.efn.gameasset.EFNAnimations;
-import com.hm.efn.gameasset.animations.EFNDodgeAnimations;
 import com.hm.efn.gameasset.animations.EFNYamatoAnimations;
 import net.EFTLM.EF.Animation.CombatBehavior.BehaviorsBuild;
 import net.EFTLM.EF.Compat.EFNCompat;
@@ -15,45 +14,6 @@ public class Yamato {
         static final CombatBehaviors.Builder<HumanoidMobPatch<?>> Instance;
         static {
             Instance = CombatBehaviors.<HumanoidMobPatch<?>>builder()
-                    .newBehaviorSeries(
-                            CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                                    .cooldown(20)
-                                    .weight(100.0F)
-                                    .canBeInterrupted(false)
-                                    .looping(false)
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_L)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_R)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_F)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                    )
                     .newBehaviorSeries(
                             CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
                                     .cooldown(20)
@@ -80,18 +40,6 @@ public class Yamato {
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
                                                     .animationBehavior(EFNYamatoAnimations.YAMATO_EXTEND_AUTO5)
                                                     .withinDistance(0.0D, 5.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 5.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_F)
-                                                    .withinDistance(0.0D, 10.0D))
                     )
                     .newBehaviorSeries(
                             CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
@@ -113,43 +61,20 @@ public class Yamato {
                                                     .withinDistance(0.0D, 3.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 10.0D))
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                    .behavior(Patch -> {
+                                                        EFNCompat.summonBlastSword(Patch);
+                                                        BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                    })
+                                                    .withinDistance(0.0D, 20.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
+                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_FLARECUT_RISING)
+                                                    .withinDistance(0.0D, 3.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_F)
-                                                    .withinDistance(0.0D, 10.0D))
-                    )
-                    .newBehaviorSeries(
-                            CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                                    .cooldown(20)
-                                    .weight(100.0F)
-                                    .canBeInterrupted(false)
-                                    .looping(false)
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 5.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_F)
-                                                    .withinDistance(0.0D, 10.0D))
+                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_HELMBREAKER)
+                                                    .withinDistance(0.0D, 3.0D))
                     )
                     .newBehaviorSeries(
                             CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
@@ -175,15 +100,19 @@ public class Yamato {
                                                     .withinDistance(0.0D, 5.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_ORBIT_1)
-                                                    .withinDistance(0.0D, 5.0D))
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                    .behavior(Patch -> {
+                                                        EFNCompat.summonBlastSword(Patch);
+                                                        BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                    })
+                                                    .withinDistance(0.0D, 20.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
                                                     .animationBehavior(EFNYamatoAnimations.YAMATO_ORBIT_1)
                                                     .withinDistance(0.0D, 5.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_ORBIT_1)
+                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_ORBIT_2)
                                                     .withinDistance(0.0D, 5.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
@@ -218,16 +147,16 @@ public class Yamato {
                                                     .withinDistance(0.0D, 5.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_HELMBREAKER)
-                                                    .withinDistance(0.0D, 3.0D))
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                    .behavior(Patch -> {
+                                                        EFNCompat.summonBlastSword(Patch);
+                                                        BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                    })
+                                                    .withinDistance(0.0D, 20.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_VOLCANOL_CHARGE)
+                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_STOMP)
                                                     .withinDistance(0.0D, 3.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 10.0D))
                     )
                     .newBehaviorSeries(
                             CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
@@ -241,10 +170,6 @@ public class Yamato {
                                                     .withinDistance(0.0D, 10.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_B)
-                                                    .withinDistance(0.0D, 10.0D))
-                                    .nextBehavior(
-                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
                                                     .animationBehavior(EFNYamatoAnimations.YAMATO_JUDEMENCUT_JUST_MOB)
                                                     .withinDistance(0.0D, 10.0D))
                                     .nextBehavior(
@@ -257,8 +182,16 @@ public class Yamato {
                                                     .withinDistance(0.0D, 10.0D))
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .animationBehavior(EFNDodgeAnimations.YAMATO_STEP_F)
+                                                    .animationBehavior(EFNYamatoAnimations.YAMATO_VOLCANOL_CHARGE)
                                                     .withinDistance(0.0D, 10.0D))
+                                    .nextBehavior(
+                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                    .behavior(Patch -> {
+                                                        EFNCompat.summonBlastSword(Patch);
+                                                        BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                    })
+                                                    .withinDistance(0.0D, 20.0D))
                     )
                     .newBehaviorSeries(
                             CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
@@ -268,7 +201,16 @@ public class Yamato {
                                     .looping(false)
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                    .custom(EFNCompat::canSummonAtWaist)
                                                     .behavior(EFNCompat::summonAtWaist)
+                                                    .withinDistance(0.0D, 20.0D))
+                                    .nextBehavior(
+                                            CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                    .behavior(Patch -> {
+                                                        EFNCompat.summonBlastSword(Patch);
+                                                        BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                    })
                                                     .withinDistance(0.0D, 20.0D))
                     )
                     .newBehaviorSeries(
@@ -279,10 +221,10 @@ public class Yamato {
                                     .looping(false)
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .custom(BehaviorsBuild::canUseSkill)
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,12))
                                                     .behavior(Patch -> {
-                                                        Patch.playAnimationSynchronized(EFNAnimations.DMC5_V_JC, 0F);
-                                                        BehaviorsBuild.setCoolDown(Patch, 1200);
+                                                            Patch.playAnimationSynchronized(EFNAnimations.DMC5_V_JC, 0F);
+                                                            BehaviorsBuild.setStack(Patch,0);
                                                     })
                                                     .withinDistance(0.0D, 24.0D))
                     );

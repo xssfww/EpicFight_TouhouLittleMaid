@@ -4,7 +4,7 @@ import net.EFTLM.EF.API.AbstractMaidEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-public class MaidKilledEvent extends AbstractMaidEvent<MaidPatch<?>> {
+public class MaidKilledEvent extends AbstractMaidEvent {
     private final LivingEntity killedEntity;
     private final DamageSource damagesource;
     public MaidKilledEvent(MaidPatch<?> maid,LivingEntity killedEntity, DamageSource damagesource) {

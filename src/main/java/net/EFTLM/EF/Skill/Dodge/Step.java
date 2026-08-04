@@ -5,10 +5,10 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.google.common.collect.Maps;
 import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
+import net.EFTLM.EF.Compat.EFNCompat;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -61,25 +61,21 @@ public class Step extends MaidSkill {
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {
-        MaidPatch<?> MaidPatch = event.getMaidPatch();
-        MaidPatch.registerData(this,STEP_RESTORE_COUNTER,0);
+        event.registerData(this,STEP_RESTORE_COUNTER,0);
     }
     @Override
-    public void MaidTick(MaidTickEvent event) {
+    public void onMaidTick(MaidTickEvent event,MaidPatch<?> patch) {
         EntityMaid Maid = event.getMaid();
-        if (!(Maid.level() instanceof ServerLevel)) return;
-        MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(Maid, MaidPatch.class);
-        if (MaidPatch == null) return;
-        LivingEntity Target = MaidPatch.getTarget();
+        LivingEntity Target = patch.getTarget();
         if (Target == null) return;
         LivingEntityPatch<?> targetPatch = EpicFightCapabilities.getEntityPatch(Target, LivingEntityPatch.class);
         if (targetPatch == null) return;
         int Phase = targetPatch.getEntityState().getLevel();
-        if (MaidPatch.getDataValue(this,STEP_RESTORE_COUNTER) != null) {
-            int Counter = MaidPatch.getDataValue(this, STEP_RESTORE_COUNTER);
-            MaidPatch.setData(this, STEP_RESTORE_COUNTER, Counter + 1);
+        if (patch.getDataValue(this,STEP_RESTORE_COUNTER) != null) {
+            int Counter = patch.getDataValue(this, STEP_RESTORE_COUNTER);
+            patch.setData(this, STEP_RESTORE_COUNTER, Counter + 1);
             if (Phase > 0 && Phase < 3) {
-                List<AnimationManager.AnimationAccessor<? extends DodgeAnimation>> dodgeAnimations = getDodgeAnimations(MaidPatch);
+                List<AnimationManager.AnimationAccessor<? extends DodgeAnimation>> dodgeAnimations = getDodgeAnimations(patch);
                 if (dodgeAnimations == null || dodgeAnimations.size() < 4) return;
                 float targetYaw = Target.getYRot();
                 Vec3 attackDir = new Vec3(-Math.sin(Math.toRadians(targetYaw)), 0, Math.cos(Math.toRadians(targetYaw)));
@@ -109,13 +105,16 @@ public class Step extends MaidSkill {
                     default:
                         return;
                 }
-                if (MaidPatch.getOriginal().tickCount - Counter > 10) {
-                    MaidPatch.setData(this, STEP_RESTORE_COUNTER, MaidPatch.getOriginal().tickCount);
-                    AttributeInstance Weight = MaidPatch.getOriginal().getAttribute(EpicFightAttributes.WEIGHT.get());
+                if (EFNCompat.isSpecialAnimation(patch)) {
+                    return;
+                }
+                if (patch.getOriginal().tickCount - Counter > 10) {
+                    patch.setData(this, STEP_RESTORE_COUNTER, patch.getOriginal().tickCount);
+                    AttributeInstance Weight = patch.getOriginal().getAttribute(EpicFightAttributes.WEIGHT.get());
                     if (Weight != null) {
-                        MaidPatch.setStamina((float) (MaidPatch.getStamina() - (Weight.getValue() * 0.1F)));
+                        patch.setStamina((float) (patch.getStamina() - (Weight.getValue() * 0.1F)));
                     }
-                    MaidPatch.playAnimationSynchronized(anim, 0F);
+                    patch.playAnimationSynchronized(anim, 0F);
                 }
             }
         }

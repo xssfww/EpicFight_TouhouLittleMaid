@@ -2,12 +2,12 @@ package net.EFTLM.EF.API;
 
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.minecraftforge.eventbus.api.Event;
-public class AbstractMaidEvent<T extends MaidPatch<?>> extends Event {
-    private final T MaidPatch;
-    public AbstractMaidEvent(T MaidPatch) {
+public class AbstractMaidEvent extends Event {
+    private final MaidPatch<?> MaidPatch;
+    public AbstractMaidEvent(MaidPatch<?> MaidPatch) {
         this.MaidPatch = MaidPatch;
     }
-    public T getMaidPatch() {
+    public MaidPatch<?> getMaidPatch() {
         return this.MaidPatch;
     }
 }

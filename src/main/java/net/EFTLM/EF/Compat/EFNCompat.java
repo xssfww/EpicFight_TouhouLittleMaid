@@ -1,29 +1,33 @@
 package net.EFTLM.EF.Compat;
 
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.google.common.collect.ImmutableMap;
 import com.guhao.efn_enhance.entity.fakeman.FakeManEntity;
+import com.guhao.efn_enhance.gameassets.animations.EFN_ESekiroAnimations;
+import com.hm.efn.entity.effect.BlastSummonedSwordEntity;
 import com.hm.efn.entity.effect.SummonedSwordEntity_Out;
-import com.hm.efn.gameasset.animations.EFNClawAnimations;
+import com.hm.efn.gameasset.EFNAnimations;
 import com.hm.efn.gameasset.animations.EFNDodgeAnimations;
+import com.hm.efn.gameasset.animations.EFNLanceAnimations;
+import com.hm.efn.gameasset.animations.EFNScytheAnimations;
+import com.hm.efn.gameasset.animations.EFNSekiroAnimations;
 import com.hm.efn.registries.EFNItem;
 import com.hm.efn.registries.EFNMobEffectRegistry;
 import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
+import net.EFTLM.EF.Animation.CombatBehavior.BehaviorsBuild;
 import net.EFTLM.EF.Animation.CombatBehavior.EFN.*;
 import net.EFTLM.EF.Animation.CombatBehavior.EFTLM_Behaviors;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
 import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.MaidSkill;
-import net.EFTLM.EF.Skill.WeaponInnate.EFN.BroadBladeSkill;
-import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_BladeSkill;
-import net.EFTLM.EF.Skill.WeaponInnate.EFN.HF_MurasamaSkill;
+import net.EFTLM.EF.Skill.WeaponInnate.EFN.*;
 import net.EFTLM.EFTLM;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -39,6 +43,7 @@ import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 public class EFNCompat {
     public static void trySetWeaponMotions(Map<Item, CombatBehaviors.Builder<HumanoidMobPatch<?>>> ItemAttackMotions, Map<Item, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> SpecialItemAttackMotions, Map<Item, HumanoidArmature> ItemArmatures) {
         if (CompatModList.LoadedEFN()) {
@@ -60,42 +65,31 @@ public class EFNCompat {
             InternalEnhance.summonFakeMan(Patch, animation, transitionTimeModifier);
         }
     }
+    public static boolean canSummonAtWaist(LivingEntityPatch<?> Patch) {
+        if (CompatModList.LoadedEFN()) {
+            YamatoSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, YamatoSkill.class);
+            if (skill == null) return false;
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, YamatoSkill.formationTime);
+            return value != null && value <= 0;
+        }
+        return false;
+    }
     public static void summonAtWaist(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
             Internal.summonAtWaist(Patch);
         }
     }
-    public static boolean isMeenCharging(LivingEntityPatch<?> Patch) {
+    public static void summonBlastSword(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
-            return Internal.isMeenCharging(Patch);
-        }
-        return false;
-    }
-    public static boolean notMeenCharging(LivingEntityPatch<?> Patch) {
-        if (CompatModList.LoadedEFN()) {
-            return Internal.notMeenCharging(Patch);
-        }
-        return false;
-    }
-    public static void clearMeenCharging(LivingEntityPatch<?> Patch) {
-        if (CompatModList.LoadedEFN()) {
-            Internal.clearMeenCharging(Patch);
+            Internal.summonBlastSword(Patch);
         }
     }
-    public static void giveClaw(LivingEntityPatch<?> Patch) {
+    public static boolean canBeastRoar(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
-            Internal.giveClaw(Patch);
-        }
-    }
-    public static boolean isClaw(LivingEntityPatch<?> Patch) {
-        if (CompatModList.LoadedEFN()) {
-            return Internal.isClaw(Patch);
-        }
-        return false;
-    }
-    public static boolean notClaw(LivingEntityPatch<?> Patch) {
-        if (CompatModList.LoadedEFN()) {
-            return Internal.notClaw(Patch);
+            ClawSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, ClawSkill.class);
+            if (skill == null) return false;
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, ClawSkill.CLAW_TIME);
+            return value != null && value <= 0;
         }
         return false;
     }
@@ -105,15 +99,27 @@ public class EFNCompat {
         }
         return false;
     }
-    public static boolean notBloodLust(LivingEntityPatch<?> Patch) {
+    public static boolean isMeenCharging(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
-            return Internal.notBloodLust(Patch);
+            MeenSpearSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, MeenSpearSkill.class);
+            if (skill == null) return false;
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MeenSpearSkill.CHARGING_TIME);
+            return value != null && value > 0;
         }
         return false;
     }
-    public static void clearBloodLust(LivingEntityPatch<?> Patch) {
+    public static boolean isMeenChargingBrink(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
-             Internal.clearBloodLust(Patch);
+            MeenSpearSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, MeenSpearSkill.class);
+            if (skill == null) return false;
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MeenSpearSkill.CHARGING_TIME);
+            return value != null && value < 100 && isMeenCharging(Patch);
+        }
+        return false;
+    }
+    public static void clearMeenEffect(LivingEntityPatch<?> Patch) {
+        if (CompatModList.LoadedEFN()) {
+            Internal.clearMeenEffect(Patch);
         }
     }
     public static void giveBloodLust(LivingEntityPatch<?> Patch) {
@@ -121,15 +127,17 @@ public class EFNCompat {
             Internal.giveBloodLust(Patch);
         }
     }
-    public static boolean isInvulnerability(LivingEntityPatch<?> Patch) {
+    public static void clearBloodLust(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
-            return Internal.isInvulnerability(Patch);
+            Internal.clearBloodLust(Patch);
         }
-        return false;
     }
-    public static boolean isImmunity(LivingEntityPatch<?> Patch) {
+    public static boolean isSpecialAnimation(MaidPatch<?> patch) {
         if (CompatModList.LoadedEFN()) {
-            return Internal.isImmunity(Patch);
+            if (CompatModList.LoadedEFN_Enhance()) {
+                return Internal.isSpecialAnimation(patch) || InternalEnhance.isSpecialAnimation(patch);
+            }
+            return Internal.isSpecialAnimation(patch);
         }
         return false;
     }
@@ -165,9 +173,24 @@ public class EFNCompat {
             ItemArmatures.put(EFNItem.HF_BLADE.get(), Armatures.BIPED.get());
         }
         static void setupSkills(MaidSkillBuildEvent event) {
-            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"board_blade_innate"), BroadBladeSkill::new, MaidSkill.createBuilder(), EFNItem.BROADBLADE.get());
-            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_murasama_innate"), HF_MurasamaSkill::new, MaidSkill.createBuilder(), EFNItem.HF_MURASAMA.get());
-            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_blade_innate"), HF_BladeSkill::new, MaidSkill.createBuilder(), EFNItem.HF_BLADE.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"board_blade_innate"),
+                    BroadBladeSkill::new, MaidSkill.createBuilder(), EFNItem.BROADBLADE.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_murasama_innate"),
+                    HF_MurasamaSkill::new, MaidSkill.createBuilder(), EFNItem.HF_MURASAMA.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"hf_blade_innate"),
+                    HF_BladeSkill::new, MaidSkill.createBuilder(), EFNItem.HF_BLADE.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"yamato_innate"),
+                    YamatoSkill::new, MaidSkill.createBuilder(), EFNItem.YAMATO_DMC_IN_SHEATH.get(), EFNItem.YAMATO_DMC4_IN_SHEATH.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"meen_innate"),
+                    MeenSpearSkill::new, MaidSkill.createBuilder(), EFNItem.MEEN_SPEAR.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"claw_innate"),
+                    ClawSkill::new, MaidSkill.createBuilder(), EFNItem.NF_CLAW.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID,"scythe_innate"),
+                    ScytheSkill::new, MaidSkill.createBuilder(), EFNItem.CRIMSON_MOON.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "kusabimaru_innate"),
+                    KusabimaruSkill::new, MaidSkill.createBuilder(), EFNItem.KUSABIMARU.get());
+            event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "blood_lust_innate"),
+                    BloodLustSkill::new, MaidSkill.createBuilder(), EFNItem.CO_TACHI.get(), EFNItem.AIR_TACHI.get());
         }
         static void setupCreate(MaidSkillBuildEvent.SkillCreateEvent<?> event) {
             if (event.getSkillBuilder() instanceof Step.Builder builder) {
@@ -227,93 +250,66 @@ public class EFNCompat {
                                 EFNDodgeAnimations.DODGE_STEP_L,EFNDodgeAnimations.DODGE_STEP_R));
             }
         }
-        static boolean isMeenCharging(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.MEEN_LANCE.get());
-            }
-            return false;
+        static void clearMeenEffect(LivingEntityPatch<?> Patch) {
+            Patch.getOriginal().removeEffect(EFNMobEffectRegistry.MEEN_LANCE.get());
         }
-        static boolean notMeenCharging(LivingEntityPatch<?> Patch) {
+        static void summonAtWaist(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return !MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.MEEN_LANCE.get());
-            }
-            return false;
-        }
-        static void clearMeenCharging(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                MaidPatch.getOriginal().removeEffect(EFNMobEffectRegistry.MEEN_LANCE.get());
-            }
-        }
-        static boolean isClaw(LivingEntityPatch<?> Patch) {
-            if (CompatModList.LoadedEFN()) {
-                if (Patch instanceof MaidPatch<?> MaidPatch) {
-                    return MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.CLAW.get());
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (owner.level() instanceof ServerLevel level) {
+                    Vec3 waistPos = owner.position().add(0.0, (double) owner.getBbHeight() * 0.6, 0.0);
+                    Vec3 spawnPos = waistPos.add(Vec3.ZERO);
+                    SummonedSwordEntity_Out Sword = new SummonedSwordEntity_Out(owner, 1.0F, Vec3.ZERO);
+                    Sword.setPos(spawnPos);
+                    Sword.setYRot(owner.getYRot());
+                    Sword.setXRot(0.0F);
+                    Patch.playSound(SoundEvents.AMETHYST_BLOCK_STEP, 1.0F, 1.0F);
+                    level.addFreshEntity(Sword);
+                    YamatoSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, YamatoSkill.class);
+                    if (skill == null) return;
+                    MaidPatch.setData(skill,YamatoSkill.formationTime,600);
                 }
             }
-            return false;
         }
-        static boolean notClaw(LivingEntityPatch<?> Patch) {
+        static void summonBlastSword(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return !MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.CLAW.get());
-            }
-            return false;
-        }
-        static void giveClaw(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                if (notClaw(MaidPatch)) {
-                    MaidPatch.getOriginal().addEffect(new MobEffectInstance(EFNMobEffectRegistry.CLAW.get(), 600, 0));
-                    MaidPatch.playAnimationSynchronized(EFNClawAnimations.NF_CLAW_BEASTROAR, 0F);
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (owner.level() instanceof ServerLevel level) {
+                    BlastSummonedSwordEntity.summon(level, owner);
+                    MaidPatch.playSound(SoundEvents.TRIDENT_RETURN, 1.5F, 1.0F, 1.0F);
                 }
             }
+        }
+        static boolean isSpecialAnimation(MaidPatch<?> patch) {
+            AssetAccessor<? extends StaticAnimation> animation = Objects.requireNonNull(patch.getAnimator().getPlayerFor(null)).getRealAnimation();
+            return animation == EFNAnimations.DMC5_V_JC
+                    || animation == EFNLanceAnimations.NF_MEEN_CHARGING_MOB
+                    || animation == EFNSekiroAnimations.MORTAL_BLADE_1
+                    || animation == EFNSekiroAnimations.MORTAL_BLADE_2
+                    || animation == EFNScytheAnimations.SCYTHE_SCARLET_END;
         }
         static boolean isBloodLust(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.BLODDLUST.get());
-            }
-            return false;
-        }
-        static boolean notBloodLust(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return !MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.BLODDLUST.get());
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (owner.level() instanceof ServerLevel) {
+                    return owner.hasEffect(EFNMobEffectRegistry.BLODDLUST.get());
+                }
             }
             return false;
         }
         static void giveBloodLust(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
-                MaidPatch.getOriginal().addEffect(new MobEffectInstance(EFNMobEffectRegistry.BLODDLUST.get(), -1, 0));
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (owner.level() instanceof ServerLevel) {
+                    owner.addEffect(new MobEffectInstance(EFNMobEffectRegistry.BLODDLUST.get(),-1));
+                }
             }
         }
         static void clearBloodLust(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
-                MaidPatch.getOriginal().removeEffect(EFNMobEffectRegistry.BLODDLUST.get());
-            }
-        }
-        static boolean isInvulnerability(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.INVINCIBILITY_EFFECT.get());
-            }
-            return false;
-        }
-        static boolean isImmunity(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                return MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.SIN_STUN_IMMUNITY.get());
-            }
-            return false;
-        }
-        static void summonAtWaist(LivingEntityPatch<?> Patch) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                LivingEntity owner = MaidPatch.getOriginal();
-                if (owner.level() instanceof ServerLevel level) {
-                    if (!owner.hasEffect(EFNMobEffectRegistry.SIN_STUN_IMMUNITY.get())) {
-                        Vec3 waistPos = owner.position().add(0.0, (double) owner.getBbHeight() * 0.6, 0.0);
-                        Vec3 spawnPos = waistPos.add(Vec3.ZERO);
-                        SummonedSwordEntity_Out Sword = new SummonedSwordEntity_Out(owner, 1.0F, Vec3.ZERO);
-                        Sword.setPos(spawnPos);
-                        Sword.setYRot(owner.getYRot());
-                        Sword.setXRot(0.0F);
-                        level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.AMETHYST_BLOCK_STEP, SoundSource.PLAYERS, 1.0F, 1.0F);
-                        level.addFreshEntity(Sword);
-                    }
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (owner.level() instanceof ServerLevel) {
+                    owner.removeEffect(EFNMobEffectRegistry.BLODDLUST.get());
                 }
             }
         }
@@ -325,12 +321,17 @@ public class EFNCompat {
                     PlayerPatch<?> Owner = MaidPatch.getOwnerPatch();
                     if (Owner instanceof ServerPlayerPatch ServerPatch) {
                         FakeManEntity FakeMan = new FakeManEntity(ServerPatch.getOriginal(), animation, transitionTimeModifier);
+                        FakeMan.setItemInHand(InteractionHand.MAIN_HAND, MaidPatch.getOriginal().getMainHandItem().copy());
                         Vec3 vec3 = MaidPatch.getOriginal().position();
                         FakeMan.moveTo(new Vec3(vec3.x, vec3.y, vec3.z));
                         Level.addFreshEntity(FakeMan);
                     }
                 }
             }
+        }
+        static boolean isSpecialAnimation(MaidPatch<?> patch) {
+            AssetAccessor<? extends StaticAnimation> animation = Objects.requireNonNull(patch.getAnimator().getPlayerFor(null)).getRealAnimation();
+            return animation == EFN_ESekiroAnimations.OPEN_MORTAL_BLADE_1;
         }
     }
 }

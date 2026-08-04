@@ -1,5 +1,6 @@
 package net.EFTLM;
 
+import net.EFTLM.EF.API.Data.BehaviorReloadListener;
 import net.EFTLM.EF.Animation.EFTLM_LivingMotions;
 import net.EFTLM.EF.Command.MaidSkillCommand;
 import net.EFTLM.EF.Item.MaidSkillBookItem;
@@ -12,6 +13,7 @@ import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -27,9 +29,13 @@ public class EFTLM {
         EFTLM_Item.ITEMS.register(bus);
         EFTLM_Menu.MENUS.register(bus);
         EFTLM_Tab.TABS.register(bus);
-        bus.addListener(this::BuildCreativeTabWithSkillBooks);
         LivingMotion.ENUM_MANAGER.registerEnumCls(MODID, EFTLM_LivingMotions.class);
+        bus.addListener(this::BuildCreativeTabWithSkillBooks);
+        MinecraftForge.EVENT_BUS.addListener(this::addReloadListenerEvent);
         MinecraftForge.EVENT_BUS.addListener(MaidSkillCommand::RegisterCommands);
+    }
+    protected void addReloadListenerEvent(AddReloadListenerEvent event) {
+        event.addListener(new BehaviorReloadListener());
     }
     protected void BuildCreativeTabWithSkillBooks(BuildCreativeModeTabContentsEvent event) {
         MaidSkillManager.getSkillRegisterName().forEach((rl) -> {

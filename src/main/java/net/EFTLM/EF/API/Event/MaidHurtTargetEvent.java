@@ -4,8 +4,7 @@ import net.EFTLM.EF.API.AbstractMaidEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.eventbus.api.Cancelable;
-public class MaidHurtTargetEvent extends AbstractMaidEvent<MaidPatch<?>> {
+public class MaidHurtTargetEvent extends AbstractMaidEvent {
     private final LivingEntity target;
     private final DamageSource source;
     public MaidHurtTargetEvent(MaidPatch<?> MaidPatch, LivingEntity target, DamageSource source) {
@@ -17,17 +16,21 @@ public class MaidHurtTargetEvent extends AbstractMaidEvent<MaidPatch<?>> {
         return this.target;
     }
     public DamageSource getSource() {
-        return source;
+        return this.source;
     }
     public static class Post extends MaidHurtTargetEvent {
-        public Post(MaidPatch<?> maid, LivingEntity target, DamageSource source) {
-            super(maid, target, source);
+        private final float amount;
+        public Post(MaidPatch<?> MaidPatch, LivingEntity target, DamageSource source, float amount) {
+            super(MaidPatch, target, source);
+            this.amount = amount;
+        }
+        public float getAmount() {
+            return amount;
         }
     }
-    @Cancelable
     public static class Pre extends MaidHurtTargetEvent {
-        public Pre(MaidPatch<?> maid, LivingEntity target, DamageSource source) {
-            super(maid, target, source);
+        public Pre(MaidPatch<?> MaidPatch, LivingEntity target, DamageSource source) {
+            super(MaidPatch, target, source);
         }
     }
 }

@@ -94,8 +94,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("libs:EpicFight-Nightfall:1.0.0")
-    implementation fg.deobf("libs:VIX:1.0.0")
-    implementation fg.deobf("libs:Fancy-Trail:1.0.0")
     implementation fg.deobf("libs:Nightfall-Enhance:1.0.0")
     implementation fg.deobf("libs:indestructible:1.0.0")
     implementation fg.deobf("libs:ef_skin:1.0.0")
@@ -103,6 +101,7 @@ dependencies {
     implementation fg.deobf("maven.modrinth:epic-fight:${epicfight_version}")
     implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:7619938")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:8061847")
+    implementation fg.deobf("libs:YSM_GEO_Compat:1.0.0")
 }
 
 jar {

@@ -1,0 +1,27 @@
+package net.EFTLM.EF.Skill.WeaponInnate.EFN;
+
+import com.hm.efn.EFN;
+import net.EFTLM.EF.Skill.MaidSkill;
+import net.EFTLM.EF.Skill.MaidSkillBuilder;
+import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.resources.ResourceLocation;
+public class KusabimaruSkill extends WeaponInnateSkill {
+    private static final float ENERGY_PER_STACK = 50.0F;
+    private static final int MAX_STACKS = 3;
+    public KusabimaruSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
+        super(builder);
+    }
+    @Override
+    protected float getEnergyCharge() {
+        return ENERGY_PER_STACK;
+    }
+    @Override
+    protected int getMaxStack() {
+        return MAX_STACKS;
+    }
+    @Override
+    public ResourceLocation getIcon() {
+        return ResourceLocation.fromNamespaceAndPath(EFN.MODID, "textures/item/kusabimaru.png");
+    }
+}
+

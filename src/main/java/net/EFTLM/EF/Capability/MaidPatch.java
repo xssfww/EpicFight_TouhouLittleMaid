@@ -399,12 +399,6 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         }
         return 0;
     }
-    public boolean canUseSkill() {
-        return !this.getOriginal().getCooldowns().isOnCooldown(this.CurrentMain);
-    }
-    public void setCoolDown(int tick) {
-        this.getOriginal().getCooldowns().addCooldown(this.CurrentMain, tick);
-    }
     public boolean CheckState() {
         return this.isHugByOwner() || this.isSleep() || this.isSit();
     }

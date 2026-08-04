@@ -4,6 +4,6 @@ Specification-Vendor: XcS
 Specification-Version: 1
 Implementation-Title: EF_TLM
 Implementation-Vendor: XcS
-Implementation-Timestamp: 2026-06-28T12:45:38+0800
+Implementation-Timestamp: 2026-08-04T18:44:00+0800
 MixinConfigs: ef_tlm.mixins.json
 

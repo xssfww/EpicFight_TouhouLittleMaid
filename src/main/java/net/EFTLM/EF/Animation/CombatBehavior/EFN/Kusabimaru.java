@@ -1,7 +1,6 @@
 package net.EFTLM.EF.Animation.CombatBehavior.EFN;
 
 import com.guhao.efn_enhance.gameassets.animations.EFN_ESekiroAnimations;
-import com.hm.efn.gameasset.animations.EFNDodgeAnimations;
 import com.hm.efn.gameasset.animations.EFNSekiroAnimations;
 import net.EFTLM.EF.Animation.CombatBehavior.BehaviorsBuild;
 import net.EFTLM.EF.Compat.CompatModList;
@@ -14,17 +13,6 @@ public class Kusabimaru {
         if (CompatModList.LoadedEFN()) {
             if (CompatModList.LoadedEFN_Enhance()) {
                 Instance = CombatBehaviors.<HumanoidMobPatch<?>>builder()
-                        .newBehaviorSeries(
-                                CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                                        .cooldown(10)
-                                        .weight(100.0F)
-                                        .canBeInterrupted(false)
-                                        .looping(false)
-                                        .nextBehavior(
-                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                        .animationBehavior(EFNDodgeAnimations.DODGE_STEP_F)
-                                                        .withinDistance(8.0D, 20.0D))
-                        )
                         .newBehaviorSeries(
                                 CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
                                         .cooldown(10)
@@ -87,34 +75,34 @@ public class Kusabimaru {
                                         .weight(100.0F)
                                         .canBeInterrupted(false)
                                         .looping(false)
-                                        .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                .animationBehavior(EFNSekiroAnimations.MORTAL_BLADE_1)
-                                                .custom(BehaviorsBuild::canUseSkill)
-                                                .withinDistance(0.0D, 20.0D))
-                                        .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                .animationBehavior(EFNSekiroAnimations.MORTAL_BLADE_2)
-                                                .withinDistance(0.0D, 20.0D))
-                                        .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                .behavior(Patch -> {
-                                                    Patch.playAnimationSynchronized(EFN_ESekiroAnimations.OPEN_MORTAL_BLADE_1, 0F);
-                                                    EFNCompat.summonFakeMan(Patch, EFN_ESekiroAnimations.FAKE_OPEN_MORTAL_BLADE_2, -0.2F);
-                                                    BehaviorsBuild.setCoolDown(Patch,1200);
-                                                })
-                                                .withinDistance(0.0D, 20.0D))
+                                        .nextBehavior(
+                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                        .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                        .behavior(Patch -> {
+                                                            Patch.playAnimationSynchronized(EFNSekiroAnimations.MORTAL_BLADE_1, 0F);
+                                                            BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                        })
+                                                        .withinDistance(0.0D, 20.0D))
+                                        .nextBehavior(
+                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                        .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                        .behavior(Patch -> {
+                                                            Patch.playAnimationSynchronized(EFNSekiroAnimations.MORTAL_BLADE_2, 0F);
+                                                            BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                        })
+                                                        .withinDistance(0.0D, 20.0D))
+                                        .nextBehavior(
+                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                        .custom(Patch -> BehaviorsBuild.hasStack(Patch, 1))
+                                                        .behavior(Patch -> {
+                                                            Patch.playAnimationSynchronized(EFN_ESekiroAnimations.OPEN_MORTAL_BLADE_1, 0F);
+                                                            EFNCompat.summonFakeMan(Patch, EFN_ESekiroAnimations.FAKE_OPEN_MORTAL_BLADE_2, -0.2F);
+                                                            BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                        })
+                                                        .withinDistance(0.0D, 20.0D))
                         );
             } else {
                 Instance = CombatBehaviors.<HumanoidMobPatch<?>>builder()
-                        .newBehaviorSeries(
-                                CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
-                                        .cooldown(10)
-                                        .weight(100.0F)
-                                        .canBeInterrupted(false)
-                                        .looping(false)
-                                        .nextBehavior(
-                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                        .animationBehavior(EFNDodgeAnimations.DODGE_STEP_F)
-                                                        .withinDistance(8.0D, 20.0D))
-                        )
                         .newBehaviorSeries(
                                 CombatBehaviors.BehaviorSeries.<HumanoidMobPatch<?>>builder()
                                         .cooldown(10)
@@ -177,16 +165,22 @@ public class Kusabimaru {
                                         .weight(100.0F)
                                         .canBeInterrupted(false)
                                         .looping(false)
-                                        .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                .animationBehavior(EFNSekiroAnimations.MORTAL_BLADE_1)
-                                                .custom(BehaviorsBuild::canUseSkill)
-                                                .withinDistance(0.0D, 20.0D))
-                                        .nextBehavior(CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                .behavior(Patch -> {
-                                                    Patch.playAnimationSynchronized(EFNSekiroAnimations.MORTAL_BLADE_2, 0F);
-                                                    BehaviorsBuild.setCoolDown(Patch,1200);
-                                                })
-                                                .withinDistance(0.0D, 20.0D))
+                                        .nextBehavior(
+                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                        .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                        .behavior(Patch -> {
+                                                            Patch.playAnimationSynchronized(EFNSekiroAnimations.MORTAL_BLADE_1, 0F);
+                                                            BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                        })
+                                                        .withinDistance(0.0D, 20.0D))
+                                        .nextBehavior(
+                                                CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
+                                                        .custom(Patch -> BehaviorsBuild.hasStack(Patch,1))
+                                                        .behavior(Patch -> {
+                                                            Patch.playAnimationSynchronized(EFNSekiroAnimations.MORTAL_BLADE_2, 0F);
+                                                            BehaviorsBuild.setStack(Patch,BehaviorsBuild.getStack(Patch) - 1);
+                                                        })
+                                                        .withinDistance(0.0D, 20.0D))
                         );
             }
         }
