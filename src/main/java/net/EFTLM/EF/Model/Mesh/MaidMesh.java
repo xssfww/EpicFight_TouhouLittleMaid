@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 @OnlyIn(Dist.CLIENT)
 public class MaidMesh extends SkinnedMesh {
-    public MaidMesh(@Nullable Map<String, Number[]> arrayMap, @Nullable Map<MeshPartDefinition, List<VertexBuilder>> partBuilders, @Nullable SkinnedMesh parent, RenderProperties properties) {
-        super(arrayMap, partBuilders, parent, properties);
+    public MaidMesh(Map<String, Number[]> arrayMap, Map<MeshPartDefinition, List<VertexBuilder>> parts, @Nullable SkinnedMesh parent, RenderProperties properties) {
+        super(arrayMap, parts, parent, properties);
     }
 }

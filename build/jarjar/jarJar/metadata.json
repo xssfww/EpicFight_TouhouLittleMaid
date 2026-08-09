@@ -1,3 +1,16 @@
 {
-  "jars": []
+  "jars": [
+    {
+      "identifier": {
+        "group": "libs",
+        "artifact": "YSM_GEO_Compat"
+      },
+      "version": {
+        "range": "[1.0.0]",
+        "artifactVersion": "1.0.0"
+      },
+      "path": "META-INF/jarjar/YSM_GEO_Compat.jar",
+      "isObfuscated": false
+    }
+  ]
 }

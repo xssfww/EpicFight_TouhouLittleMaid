@@ -88,6 +88,7 @@ public class ScytheSkill extends WeaponInnateSkill {
         if (!(event.getSource() instanceof EpicFightDamageSource efSource)) return;
         LivingEntity maidEntity = maid.getOriginal();
         AnimationManager.AnimationAccessor<? extends StaticAnimation> animation = efSource.getAnimation();
+        maidEntity.heal(event.getAmount() * 0.25F);
         if (animation == EFNScytheAnimations.SCYTHE_SCARLET_END) {
             MobEffectInstance curse = target.getEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD.get());
             MobEffectInstance blessing = maidEntity.getEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS.get());
@@ -98,7 +99,7 @@ public class ScytheSkill extends WeaponInnateSkill {
                 amplifier = blessing.getAmplifier() + 1;
             }
             if (amplifier > 0) {
-                maidEntity.heal(maidEntity.getMaxHealth() * 0.03F * amplifier);
+                maidEntity.heal(maidEntity.getMaxHealth() * 0.25F * amplifier);
                 Vec3 pos = maidEntity.position().add(0.0, maidEntity.getBbHeight() / 2.0, 0.0);
                 if (maidEntity.level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 10, 0.35, 1.0, 0.35, 1.0);
