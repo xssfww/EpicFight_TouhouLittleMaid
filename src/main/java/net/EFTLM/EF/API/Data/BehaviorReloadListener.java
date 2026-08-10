@@ -46,7 +46,7 @@ public class BehaviorReloadListener extends SimpleJsonResourceReloadListener {
         super(GSON, DIRECTORY);
     }
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> objects, @NotNull ResourceManager manager, @NotNull ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<ResourceLocation, JsonElement> objects, @NotNull ResourceManager manager, @NotNull ProfilerFiller profiler) {
         ITEM_ATTACK_MOTIONS.clear();
         ITEM_STYLE_MOTIONS.clear();
         WEAPON_STYLE_MOTIONS.clear();

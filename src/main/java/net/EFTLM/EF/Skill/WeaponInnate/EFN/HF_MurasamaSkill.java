@@ -19,8 +19,6 @@ import yesman.epicfight.api.animation.AnimationManager;
 import java.util.List;
 import com.google.common.collect.Lists;
 public class HF_MurasamaSkill extends WeaponInnateSkill {
-    private static final float ENERGY_PER_STACK = 40.0F;
-    private static final int MAX_STACKS = 3;
     public static List<AnimationManager.AnimationAccessor<? extends AvalonAttackAnimation>> ZansetsuList = Lists.newArrayList();
     public static final MaidSkillDataManager.SkillDataKey<Boolean> isZansetsu =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.BOOLEAN);
@@ -45,14 +43,6 @@ public class HF_MurasamaSkill extends WeaponInnateSkill {
     }
     public HF_MurasamaSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
-    }
-    @Override
-    protected float getEnergyCharge() {
-        return ENERGY_PER_STACK;
-    }
-    @Override
-    protected int getMaxStack() {
-        return MAX_STACKS;
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {

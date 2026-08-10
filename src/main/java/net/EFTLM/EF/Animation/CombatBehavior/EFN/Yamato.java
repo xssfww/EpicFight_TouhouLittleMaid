@@ -221,7 +221,7 @@ public class Yamato {
                                     .looping(false)
                                     .nextBehavior(
                                             CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,12))
+                                                    .custom(Patch -> BehaviorsBuild.hasStack(Patch,BehaviorsBuild.getMaxStack(Patch)))
                                                     .behavior(Patch -> {
                                                             Patch.playAnimationSynchronized(EFNAnimations.DMC5_V_JC, 0F);
                                                             BehaviorsBuild.setStack(Patch,0);

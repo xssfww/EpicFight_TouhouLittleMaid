@@ -16,20 +16,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 public class YamatoSkill extends WeaponInnateSkill {
-    private static final float ENERGY_PER_STACK = 70.0F;
-    private static final int MAX_STACKS = 12;
     public static final MaidSkillDataManager.SkillDataKey<Integer> formationTime =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     public YamatoSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
-    }
-    @Override
-    protected float getEnergyCharge() {
-        return ENERGY_PER_STACK;
-    }
-    @Override
-    protected int getMaxStack() {
-        return MAX_STACKS;
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {

@@ -67,7 +67,7 @@ public class Scythe {
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .custom(Patch -> BehaviorsBuild.hasStack(Patch,12))
+                                            .custom(Patch -> BehaviorsBuild.hasStack(Patch,BehaviorsBuild.getMaxStack(Patch)))
                                             .behavior(Patch -> {
                                                 Patch.playAnimationSynchronized(EFNScytheAnimations.SCYTHE_SCARLET_END, 0F);
                                                 BehaviorsBuild.setStack(Patch,0);

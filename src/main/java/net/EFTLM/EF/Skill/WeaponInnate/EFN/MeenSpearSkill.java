@@ -10,17 +10,11 @@ import net.EFTLM.EF.Skill.MaidSkillDataManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.resources.ResourceLocation;
 public class MeenSpearSkill extends WeaponInnateSkill {
-    private static final float ENERGY_PER_STACK = 30.0F;
-    private static final int MAX_STACKS = 3;
     public static final MaidSkillDataManager.SkillDataKey<Integer> CHARGING_TIME =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     public MeenSpearSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
     }
-    @Override
-    protected float getEnergyCharge() { return ENERGY_PER_STACK; }
-    @Override
-    protected int getMaxStack() { return MAX_STACKS; }
     @Override
     public void onInit(MaidSkillInitEvent event) {
         super.onInit(event);

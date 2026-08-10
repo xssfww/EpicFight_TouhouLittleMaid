@@ -1,4 +1,14 @@
 {
-  "mappings": {},
-  "data": {}
+  "mappings": {
+    "net/EFTLM/Mixin/AttributeInstanceMixin": {
+      "addTransientModifier": "Lnet/minecraft/world/entity/ai/attributes/AttributeInstance;m_22118_(Lnet/minecraft/world/entity/ai/attributes/AttributeModifier;)V"
+    }
+  },
+  "data": {
+    "searge": {
+      "net/EFTLM/Mixin/AttributeInstanceMixin": {
+        "addTransientModifier": "Lnet/minecraft/world/entity/ai/attributes/AttributeInstance;m_22118_(Lnet/minecraft/world/entity/ai/attributes/AttributeModifier;)V"
+      }
+    }
+  }
 }

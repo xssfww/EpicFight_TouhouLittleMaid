@@ -9,17 +9,29 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
+import net.EFTLM.EF.Utils.CompoundTagManager;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import java.util.Objects;
 public abstract class WeaponInnateSkill extends MaidSkill {
-    protected abstract float getEnergyCharge();
-    protected abstract int getMaxStack();
+    protected float consumption;
+    protected int maxStack;
     public static final MaidSkillDataManager.SkillDataKey<Integer> STACK =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     public static final MaidSkillDataManager.SkillDataKey<Float> ENERGY =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.FLOAT);
     public WeaponInnateSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
+    }
+    public float getEnergyCharge() {
+        return this.consumption;
+    }
+    public int getMaxStack() {
+        return this.maxStack;
+    }
+    public void setParams(CompoundTag parameters) {
+        this.consumption = parameters.getFloat(CompoundTagManager.Consumption);
+        this.maxStack = parameters.getInt(CompoundTagManager.Stack);
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {

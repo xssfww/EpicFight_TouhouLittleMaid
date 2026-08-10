@@ -1,6 +1,7 @@
 package net.EFTLM;
 
 import net.EFTLM.EF.API.Data.BehaviorReloadListener;
+import net.EFTLM.EF.API.Data.SkillDataReloadListener;
 import net.EFTLM.EF.Animation.EFTLM_LivingMotions;
 import net.EFTLM.EF.Command.MaidSkillCommand;
 import net.EFTLM.EF.Item.MaidSkillBookItem;
@@ -36,6 +37,7 @@ public class EFTLM {
     }
     protected void addReloadListenerEvent(AddReloadListenerEvent event) {
         event.addListener(new BehaviorReloadListener());
+        event.addListener(new SkillDataReloadListener());
     }
     protected void BuildCreativeTabWithSkillBooks(BuildCreativeModeTabContentsEvent event) {
         MaidSkillManager.getSkillRegisterName().forEach((rl) -> {

@@ -10,20 +10,20 @@ import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 public class ClawSkill extends WeaponInnateSkill {
-    private static final float ENERGY_PER_STACK = 30.0F;
-    private static final int MAX_STACKS = 3;
-    private static final float HEAL_RATIO = 0.25F;
+    private float HEAL_RATIO;
     public static final MaidSkillDataManager.SkillDataKey<Integer> CLAW_TIME =
             MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     public ClawSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
     }
     @Override
-    protected float getEnergyCharge() { return ENERGY_PER_STACK; }
-    @Override
-    protected int getMaxStack() { return MAX_STACKS; }
+    public void setParams(CompoundTag parameters) {
+        super.setParams(parameters);
+        HEAL_RATIO = parameters.getFloat("heal_ratio");
+    }
     @Override
     public void onInit(MaidSkillInitEvent event) {
         super.onInit(event);

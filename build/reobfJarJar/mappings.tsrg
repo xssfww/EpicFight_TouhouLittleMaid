@@ -9654,6 +9654,9 @@ com/mojang/realmsclient/util/task/WorldCreationTask com/mojang/realmsclient/util
 		3 p_90471_ p_90471_
 	run ()V run
 com/mojang/realmsclient/util/task/package-info com/mojang/realmsclient/util/task/package-info
+net/EFTLM/Mixin/AttributeInstanceMixin net/EFTLM/Mixin/AttributeInstanceMixin
+	getModifier (Ljava/util/UUID;)Lnet/minecraft/world/entity/ai/attributes/AttributeModifier; m_22111_
+	removeModifier (Ljava/util/UUID;)V m_22120_
 net/minecraft/BlockUtil net/minecraft/BlockUtil
 	<init> ()V <init>
 	getLargestRectangleAround (Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction$Axis;ILnet/minecraft/core/Direction$Axis;ILjava/util/function/Predicate;)Lnet/minecraft/BlockUtil$FoundRectangle; m_124334_

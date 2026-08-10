@@ -1,0 +1,2 @@
+net/EFTLM/Mixin/AttributeInstanceMixin getModifier (Ljava/util/UUID;)Lnet/minecraft/world/entity/ai/attributes/AttributeModifier; m_22111_
+net/EFTLM/Mixin/AttributeInstanceMixin removeModifier (Ljava/util/UUID;)V m_22120_

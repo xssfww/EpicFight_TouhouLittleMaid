@@ -79,12 +79,12 @@ public class HF_Murasama {
                             .looping(false)
                             .nextBehavior(
                                     CombatBehaviors.Behavior.<HumanoidMobPatch<?>>builder()
-                                            .custom(patch -> BehaviorsBuild.hasStack(patch,2))
+                                            .custom(Patch -> BehaviorsBuild.hasStack(Patch,BehaviorsBuild.getMaxStack(Patch)))
                                             .behavior(patch -> {
                                                 HF_MurasamaSkill skill = BehaviorsBuild.getWeaponInnateSkill(patch, HF_MurasamaSkill.class);
                                                 if (skill == null) return;
                                                 BehaviorsBuild.setData(patch,skill,HF_MurasamaSkill.isZansetsu,true);
-                                                BehaviorsBuild.setStack(patch, BehaviorsBuild.getStack(patch) - 2);
+                                                BehaviorsBuild.setStack(patch, 0);
                                             })
                                             .withinDistance(0.0D, 2.0D))
                     );

@@ -52,6 +52,11 @@ public class BehaviorsBuild {
         Integer stack = getDataValue(patch,skill,WeaponInnateSkill.STACK);
         return stack == null ? 0 : stack;
     }
+    public static int getMaxStack(LivingEntityPatch<?> patch) {
+        WeaponInnateSkill skill = getWeaponInnateSkill(patch);
+        if (skill == null) return 0;
+        return skill.getMaxStack();
+    }
     public static void setStack(LivingEntityPatch<?> patch,int amount) {
         WeaponInnateSkill skill = getWeaponInnateSkill(patch);
         if (skill == null) return;

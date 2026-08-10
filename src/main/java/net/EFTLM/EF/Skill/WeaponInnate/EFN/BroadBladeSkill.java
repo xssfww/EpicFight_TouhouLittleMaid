@@ -41,14 +41,6 @@ public class BroadBladeSkill extends WeaponInnateSkill {
         super(builder);
     }
     @Override
-    protected float getEnergyCharge() {
-        return 0;
-    }
-    @Override
-    protected int getMaxStack() {
-        return 0;
-    }
-    @Override
     public void onMaidHurt(MaidHurtEvent event, MaidPatch<?> patch) {
         if (patch.getEntityState().getLevel() == 1) {
             if (event.getSource() instanceof EpicFightDamageSource efSource) {

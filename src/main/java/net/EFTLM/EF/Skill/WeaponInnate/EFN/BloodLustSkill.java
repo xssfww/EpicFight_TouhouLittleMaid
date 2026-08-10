@@ -11,18 +11,17 @@ import net.EFTLM.EF.Compat.EFNCompat;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 public class BloodLustSkill extends WeaponInnateSkill {
+    private float HEAL_RATIO;
     public BloodLustSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
     }
     @Override
-    protected float getEnergyCharge() {
-        return 0;
-    }
-    @Override
-    protected int getMaxStack() {
-        return 0;
+    public void setParams(CompoundTag parameters) {
+        super.setParams(parameters);
+        HEAL_RATIO = parameters.getFloat("heal_ratio");
     }
     @Override
     public void onRemove(MaidChangeItemEvent event) {
@@ -53,7 +52,7 @@ public class BloodLustSkill extends WeaponInnateSkill {
         super.onHurtTargetPost(event);
         EntityMaid maid = event.getMaidPatch().getOriginal();
         if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST.get())) {
-            float healAmount = event.getAmount() * 0.3F;
+            float healAmount = event.getAmount() * HEAL_RATIO;
             maid.heal(healAmount);
         }
     }
