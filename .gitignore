@@ -1,0 +1,35 @@
+# Gradle / build output
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# ForgeGradle dev run directory: generated configs, logs, crashes, saves and
+# downloaded/installed mod jars are runtime artifacts, not sources.
+run/config/
+run/crash-reports/
+run/defaultconfigs/
+run/logs/
+run/mods/
+run/reports/
+run/resourcepacks/
+run/saves/
+run/screenshots/
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+*.log
+logs/
+
+# NOTE: libs/*.jar is deliberately KEPT tracked - those jars are build
+# dependencies AND the jarJar-embedded mods (see build.gradle), so the build
+# does not work without them.
