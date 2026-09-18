@@ -1,0 +1,6 @@
+{
+  "max_stacks": 12,
+  "consumption": 15.0,
+  "heal_ratio": 0.25,
+  "heal_ratio_end": 0.25
+}

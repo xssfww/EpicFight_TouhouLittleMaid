@@ -1,0 +1,80 @@
+{
+  "weapon_categories": ["dagger"],
+  "style": "one_hand",
+  "combat_behaviors": [
+    {
+      "weight": 1.0,
+      "cooldown": 0,
+      "canBeInterrupted": true,
+      "looping": false,
+      "behaviors": [
+        {
+          "animation": "epicfight:biped/combat/dagger_auto1",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 3.0
+            }
+          ]
+        },
+        {
+          "animation": "epicfight:biped/combat/dagger_auto2",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 3.0
+            }
+          ]
+        },
+        {
+          "animation": "epicfight:biped/combat/dagger_auto3",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 3.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 0.6,
+      "cooldown": 20,
+      "canBeInterrupted": false,
+      "looping": false,
+      "behaviors": [
+        {
+          "animation": "epicfight:biped/skill/eviscerate_second",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 3.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weight": 1.0,
+      "cooldown": 20,
+      "canBeInterrupted": false,
+      "looping": false,
+      "behaviors": [
+        {
+          "animation": "epicfight:biped/combat/dagger_dash",
+          "conditions": [
+            {
+              "predicate": "epicfight:within_distance",
+              "min": 0.0,
+              "max": 3.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

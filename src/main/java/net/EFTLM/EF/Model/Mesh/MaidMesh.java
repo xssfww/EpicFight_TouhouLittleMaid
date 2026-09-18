@@ -1,0 +1,13 @@
+package net.EFTLM.EF.Model.Mesh;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.*;
+import javax.annotation.Nullable;
+import java.util.*;
+@OnlyIn(Dist.CLIENT)
+public class MaidMesh extends SkinnedMesh {
+    public MaidMesh(Map<String, Number[]> arrayMap, Map<MeshPartDefinition, List<VertexBuilder>> parts, @Nullable SkinnedMesh parent, RenderProperties properties) {
+        super(arrayMap, parts, parent, properties);
+    }
+}

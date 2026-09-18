@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures":
+  {
+    "layer0" : "ef_tlm:item/skillbook"
+  }
+}

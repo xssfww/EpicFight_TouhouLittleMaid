@@ -1,0 +1,18 @@
+{
+  "type": "ef_tlm:random_skill_altar",
+  "output": {
+    "type": "minecraft:item",
+    "nbt": {
+      "Item": {
+        "id": "ef_tlm:skillbook",
+        "Count": 1
+      }
+    }
+  },
+  "power": 1.0,
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "minecraft:diamond" },
+    { "item": "minecraft:ender_pearl" }
+  ]
+}
