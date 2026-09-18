@@ -13,7 +13,6 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.EFNCompat;
 import net.EFTLM.EF.Item.MaidSkillBookItem;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
-import net.EFTLM.EF.Register.EFTLM_Tab;
 import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.Guard.BladeClash;
 import net.EFTLM.EF.Skill.MaidSkill;
@@ -258,9 +257,9 @@ public class EventBus {
         @SubscribeEvent
         public static void MaidSkillBuild(MaidSkillBuildEvent event) {
             event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "blade_clash"), BladeClash::new,
-                    BladeClash.createBuilder().setCreativeTab(EFTLM_Tab.SKILL.get()));
+                    BladeClash.createBuilder());
             event.build(ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "step"), Step::new,
-                    Step.createStepBuilder().setCreativeTab(EFTLM_Tab.SKILL.get()));
+                    Step.createStepBuilder());
             EFNCompat.tryBuildSkills(event);
         }
         @SubscribeEvent

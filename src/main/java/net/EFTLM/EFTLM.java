@@ -20,7 +20,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.world.item.EpicFightCreativeTabs;
 @SuppressWarnings("ALL")
 @Mod("ef_tlm")
 public class EFTLM {
@@ -52,7 +51,7 @@ public class EFTLM {
                         event.accept(stack);
                     }
                 } else {
-                    if (event.getTab().equals(EpicFightCreativeTabs.ITEMS.get())) {
+                    if (event.getTab().equals(EFTLM_Tab.SKILL.get())) {
                         ItemStack stack = new ItemStack(EFTLM_Item.SKILLBOOK.get());
                         MaidSkillBookItem.setContainingSkill(Skill, stack);
                         event.accept(stack);
