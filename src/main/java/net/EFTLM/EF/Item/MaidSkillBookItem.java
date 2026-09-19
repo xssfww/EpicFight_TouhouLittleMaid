@@ -1,10 +1,12 @@
 package net.EFTLM.EF.Item;
 
 import net.EFTLM.EF.Render.Gui.MaidSkillBookScreen;
+import net.EFTLM.EF.Render.SkillBookRenderer;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,10 +20,13 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
+
 public class MaidSkillBookItem extends Item {
     public MaidSkillBookItem(Properties Properties) {
         super(Properties);
@@ -50,6 +55,16 @@ public class MaidSkillBookItem extends Item {
         if (Skill != null) {
             tooltip.add(Skill.getTitle().withStyle(ChatFormatting.DARK_GRAY));
         }
+    }
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                return SkillBookRenderer.getInstance();
+            }
+        });
     }
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level world, Player player, @NotNull InteractionHand hand) {

@@ -12,9 +12,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 public abstract class MaidSkill {
     protected final ResourceLocation registryName;
+    protected final ResourceLocation iconName;
     protected final CreativeModeTab creativeTab;
     public MaidSkill(MaidSkillBuilder<? extends MaidSkill> builder) {
         this.registryName = builder.registryName;
+        this.iconName = builder.iconName;
         this.creativeTab = builder.tab;
     }
     public static MaidSkillBuilder<MaidSkill> createBuilder() {
@@ -78,6 +80,9 @@ public abstract class MaidSkill {
     }
     public ResourceLocation getRegistryName() {
         return this.registryName;
+    }
+    public ResourceLocation getItemIcon() {
+        return this.iconName;
     }
     public CreativeModeTab getCreativeTab() {
         return this.creativeTab;

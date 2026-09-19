@@ -1,4 +1,4 @@
-package net.EFTLM.EF.Render.Gui;
+package net.EFTLM.EF.Render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.EFTLM.EF.Capability.MaidPatch;

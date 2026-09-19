@@ -7,7 +7,7 @@ import net.EFTLM.EF.Model.EFTLM_Meshes;
 import net.EFTLM.EF.Network.Packet.Server.OpenMaidSkillScreenPacket;
 import net.EFTLM.EF.Network.PacketSend;
 import net.EFTLM.EF.Register.EFTLM_Menu;
-import net.EFTLM.EF.Render.Gui.MaidHealthBar;
+import net.EFTLM.EF.Render.MaidHealthBar;
 import net.EFTLM.EF.Render.Gui.MaidSkillMenuScreen;
 import net.EFTLM.EF.Render.Gui.Widget.MaidSkillTabButton;
 import net.EFTLM.EF.Render.PatchedLivingMaidRenderer;

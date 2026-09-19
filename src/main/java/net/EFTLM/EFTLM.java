@@ -20,7 +20,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import yesman.epicfight.api.animation.LivingMotion;
-@SuppressWarnings("ALL")
 @Mod("ef_tlm")
 public class EFTLM {
     public static final String MODID = "ef_tlm";
