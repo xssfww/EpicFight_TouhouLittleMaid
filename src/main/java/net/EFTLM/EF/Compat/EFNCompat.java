@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.guhao.efn_enhance.entity.fakeman.FakeManEntity;
 import com.guhao.efn_enhance.gameassets.animations.EFN_ESekiroAnimations;
 import com.hm.efn.entity.effect.BlastSummonedSwordEntity;
+import com.hm.efn.entity.effect.HeavyRainSwordEntity;
+import com.hm.efn.entity.effect.SummonedSwordEntity_In;
 import com.hm.efn.entity.effect.SummonedSwordEntity_Out;
 import com.hm.efn.gameasset.EFNAnimations;
 import com.hm.efn.gameasset.animations.EFNDodgeAnimations;
@@ -13,21 +15,25 @@ import com.hm.efn.gameasset.animations.EFNScytheAnimations;
 import com.hm.efn.gameasset.animations.EFNSekiroAnimations;
 import com.hm.efn.registries.EFNItem;
 import com.hm.efn.registries.EFNMobEffectRegistry;
+import net.EFTLM.EF.Skill.MaidSkillDataKeys;
 import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
-import net.EFTLM.EF.Animation.CombatBehavior.BehaviorsBuild;
-import net.EFTLM.EF.Animation.CombatBehavior.EFN.*;
-import net.EFTLM.EF.Animation.CombatBehavior.EFTLM_Behaviors;
+import net.EFTLM.EF.Animation.BehaviorsBuild;
+import net.EFTLM.EF.Animation.EFTLM_Behaviors;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Model.EFTLM_Armatures;
 import net.EFTLM.EF.Skill.Dodge.Step;
 import net.EFTLM.EF.Skill.MaidSkill;
-import net.EFTLM.EF.Skill.WeaponInnate.EFN.*;
+import net.EFTLM.EFN.CombatBehavior.*;
+import net.EFTLM.EFN.Skill.*;
 import net.EFTLM.EFTLM;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -69,7 +75,7 @@ public class EFNCompat {
         if (CompatModList.LoadedEFN()) {
             YamatoSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, YamatoSkill.class);
             if (skill == null) return false;
-            Integer value = BehaviorsBuild.getDataValue(Patch, skill, YamatoSkill.formationTime);
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MaidSkillDataKeys.YAMATO_FORMATION_TIME);
             return value != null && value <= 0;
         }
         return false;
@@ -84,11 +90,21 @@ public class EFNCompat {
             Internal.summonBlastSword(Patch);
         }
     }
+    public static void summonSwordRain(LivingEntityPatch<?> Patch) {
+        if (CompatModList.LoadedEFN()) {
+            Internal.summonSwordRain(Patch);
+        }
+    }
+    public static void summonHeavyRain(LivingEntityPatch<?> Patch) {
+        if (CompatModList.LoadedEFN()) {
+            Internal.summonHeavyRain(Patch);
+        }
+    }
     public static boolean canBeastRoar(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
             ClawSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, ClawSkill.class);
             if (skill == null) return false;
-            Integer value = BehaviorsBuild.getDataValue(Patch, skill, ClawSkill.CLAW_TIME);
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MaidSkillDataKeys.CLAW_TIME);
             return value != null && value <= 0;
         }
         return false;
@@ -103,7 +119,7 @@ public class EFNCompat {
         if (CompatModList.LoadedEFN()) {
             MeenSpearSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, MeenSpearSkill.class);
             if (skill == null) return false;
-            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MeenSpearSkill.CHARGING_TIME);
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MaidSkillDataKeys.MEEN_CHARGING_TIME);
             return value != null && value > 0;
         }
         return false;
@@ -112,7 +128,7 @@ public class EFNCompat {
         if (CompatModList.LoadedEFN()) {
             MeenSpearSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, MeenSpearSkill.class);
             if (skill == null) return false;
-            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MeenSpearSkill.CHARGING_TIME);
+            Integer value = BehaviorsBuild.getDataValue(Patch, skill, MaidSkillDataKeys.MEEN_CHARGING_TIME);
             return value != null && value < 100 && isMeenCharging(Patch);
         }
         return false;
@@ -267,7 +283,7 @@ public class EFNCompat {
                     level.addFreshEntity(Sword);
                     YamatoSkill skill = BehaviorsBuild.getWeaponInnateSkill(Patch, YamatoSkill.class);
                     if (skill == null) return;
-                    MaidPatch.setData(skill,YamatoSkill.formationTime,600);
+                    MaidPatch.setData(skill,MaidSkillDataKeys.YAMATO_FORMATION_TIME,600);
                 }
             }
         }
@@ -277,6 +293,37 @@ public class EFNCompat {
                 if (owner.level() instanceof ServerLevel level) {
                     BlastSummonedSwordEntity.summon(level, owner);
                     MaidPatch.playSound(SoundEvents.TRIDENT_RETURN, 1.5F, 1.0F, 1.0F);
+                }
+            }
+        }
+        static void summonSwordRain(LivingEntityPatch<?> Patch) {
+            if (Patch instanceof MaidPatch<?> MaidPatch) {
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (!(owner.level() instanceof ServerLevel level)) return;
+                LivingEntity target = MaidPatch.getTarget();
+                if (target == null || !target.isAlive()) return;
+                Vec3 offset = Vec3.ZERO;
+                Vec3 spawnPos = target.position().add(0.0, (double) target.getBbHeight() * 0.7, 0.0).add(offset);
+                SummonedSwordEntity_In Sword = new SummonedSwordEntity_In(owner, target, 1.6F, offset);
+                Sword.setPos(spawnPos);
+                Sword.setYRot(target.getYRot());
+                Sword.setXRot(0.0F);
+                level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
+                level.addFreshEntity(Sword);
+                target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 5));
+            }
+        }
+        static void summonHeavyRain(LivingEntityPatch<?> Patch) {
+            if (Patch instanceof MaidPatch<?> MaidPatch) {
+                EntityMaid owner = MaidPatch.getOriginal();
+                if (!(owner.level() instanceof ServerLevel level)) return;
+                LivingEntity target = MaidPatch.getTarget();
+                MaidPatch.playSound(SoundEvents.TRIDENT_RETURN, 1.5F, 1.0F, 1.0F);
+                if (target != null && target.isAlive()) {
+                    HeavyRainSwordEntity.summon(level, owner, target);
+                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 255));
+                } else {
+                    HeavyRainSwordEntity.summon(level, owner);
                 }
             }
         }

@@ -7,10 +7,12 @@ import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import com.google.common.collect.Maps;
 import net.EFTLM.EF.API.Event.MaidChangeItemEvent;
 import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
-import net.EFTLM.EF.Animation.CombatBehavior.*;
 import net.EFTLM.EF.API.Event.CombatBehaviorsEvent;
+import net.EFTLM.EF.Animation.EFTLM_Behaviors;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
+import net.EFTLM.EF.Skill.MaidSkillManager;
+import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.EFTLM.EF.Utils.CompoundTagManager;
 import net.EFTLM.TLM.Task.FightModeTask;
 import net.minecraft.nbt.*;
@@ -64,8 +66,10 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
     protected Map<MaidSkill, Map<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data>> SkillDataKey = Maps.newHashMap();
     public Item CurrentMain;
     public Item CurrentOff;
+    public Style CurrentStyle;
     protected List<ResourceLocation> LearnedSkills = new ArrayList<>();
     protected boolean hasFightAi;
+    private boolean lastCheckState = false;
     public MaidPatch() {
         super(Factions.NEUTRAL);
     }
@@ -104,7 +108,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         if (!this.hasLearnedSkill(RegistryName)) {
             this.LearnedSkills.add(RegistryName);
             this.saveToPersistent();
-            MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
+            MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this,RegistryName));
         }
     }
     public void removeLearnedSkill(ResourceLocation RegistryName) {
@@ -158,7 +162,9 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         Item Off = entity.getOffhandItem().getItem();
         this.CurrentMain = Main;
         this.CurrentOff = Off;
+        this.CurrentStyle = this.getHoldingItemStyle();
         MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
+        MinecraftForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
     }
     @Override
     public HumanoidArmature getArmature() {
@@ -187,14 +193,21 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
             if (this.isFightMode()) {
                 Item Main = this.getOriginal().getMainHandItem().getItem();
                 Item Off = this.getOriginal().getOffhandItem().getItem();
-                if (this.CurrentMain != Main || this.CurrentOff != Off || this.CheckState()) {
+                Style style = this.getHoldingItemStyle();
+                boolean stateCheck = this.CheckState();
+                boolean itemChanged = this.CurrentMain != Main || this.CurrentOff != Off;
+                boolean styleChanged = !Objects.equals(this.CurrentStyle, style);
+                boolean stateChanged = stateCheck != this.lastCheckState;
+                if (itemChanged || styleChanged || stateChanged) {
                     this.resetAnimation();
                     this.resetAi();
                     this.CurrentMain = Main;
                     this.CurrentOff = Off;
+                    this.CurrentStyle = style;
+                    this.lastCheckState = stateCheck;
                     MinecraftForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
                 }
-                if (!this.hasFightAi && !this.CheckState()) {
+                if (!this.hasFightAi && !stateCheck) {
                     this.resetAi();
                 }
             } else {
@@ -290,6 +303,18 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
             }
         }
         return this.getOriginal().getMainHandItem().isEmpty() ? MobCombatBehaviors.HUMANOID_FIST : MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS;
+    }
+    public Style getHoldingItemStyle() {
+        CapabilityItem ItemCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
+        return ItemCap == null ? null : ItemCap.getStyle(this);
+    }
+    public WeaponInnateSkill getWeaponInnateSkill() {
+        ItemStack ItemStack = this.getOriginal().getMainHandItem();
+        CapabilityItem ItemCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
+        if (ItemCap == null) {
+            return MaidSkillManager.getWeaponSkillFor(ItemStack.getItem(), null, null);
+        }
+        return MaidSkillManager.getWeaponSkillFor(ItemStack.getItem(), ItemCap.getWeaponCategory(), ItemCap.getStyle(this));
     }
     @Override
     public AnimationManager.AnimationAccessor<? extends StaticAnimation> getHitAnimation(StunType stunType) {
@@ -431,23 +456,58 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
             SkillsList.add(StringTag.valueOf(SkillRegisterId.toString()));
         }
         NBT.put(CompoundTagManager.LearnedSkills, SkillsList);
+        serializeSkillData(NBT);
         return NBT;
+    }
+    private void serializeSkillData(CompoundTag NBT) {
+        CompoundTag SkillData = new CompoundTag();
+        for (Map.Entry<MaidSkill, Map<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data>> Entry : this.SkillDataKey.entrySet()) {
+            MaidSkill Skill = Entry.getKey();
+            if (Skill == null || Skill.getRegistryName() == null) continue;
+            CompoundTag One = new CompoundTag();
+            for (Map.Entry<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data> DataEntry : Entry.getValue().entrySet()) {
+                writeSkillDataValue(One, DataEntry.getKey(), DataEntry.getValue());
+            }
+            if (!One.isEmpty()) {
+                SkillData.put(Skill.getRegistryName().toString(), One);
+            }
+        }
+        if (!SkillData.isEmpty()) {
+            NBT.put(CompoundTagManager.SkillData, SkillData);
+        }
+    }
+    private static void writeSkillDataValue(CompoundTag Nbt, MaidSkillDataManager.SkillDataKey<?> Key, MaidSkillDataManager.Data Value) {
+        Key.getValueType().write(Nbt, Key.getId().toString(), Value);
     }
     @Override
     public void deserializeNBT(CompoundTag NBT) {
         CompoundTag MaidCap = NBT.getCompound(CompoundTagManager.MaidCap);
-        if (MaidCap.contains(CompoundTagManager.LearnedSkills)) {
-            ListTag SkillsList = MaidCap.getList(CompoundTagManager.LearnedSkills, StringTag.TAG_STRING);
-            this.LearnedSkills = new ArrayList<>();
-            for (int i = 0; i < SkillsList.size(); i++) {
-                this.LearnedSkills.add(ResourceLocation.parse(SkillsList.getString(i)));
-            }
-        } else {
-            ListTag SkillsList = NBT.getList(CompoundTagManager.LearnedSkills, StringTag.TAG_STRING);
-            this.LearnedSkills = new ArrayList<>();
-            for (int i = 0; i < SkillsList.size(); i++) {
-                this.LearnedSkills.add(ResourceLocation.parse(SkillsList.getString(i)));
+        CompoundTag Source = MaidCap.contains(CompoundTagManager.LearnedSkills) ? MaidCap : NBT;
+        ListTag SkillsList = Source.getList(CompoundTagManager.LearnedSkills, StringTag.TAG_STRING);
+        this.LearnedSkills = new ArrayList<>();
+        for (int i = 0; i < SkillsList.size(); i++) {
+            this.LearnedSkills.add(ResourceLocation.parse(SkillsList.getString(i)));
+        }
+        deserializeSkillData(Source);
+    }
+    private void deserializeSkillData(CompoundTag NBT) {
+        if (!NBT.contains(CompoundTagManager.SkillData, Tag.TAG_COMPOUND)) return;
+        CompoundTag SkillData = NBT.getCompound(CompoundTagManager.SkillData);
+        for (String SkillId : SkillData.getAllKeys()) {
+            MaidSkill Skill = MaidSkillManager.getSkillFor(ResourceLocation.parse(SkillId));
+            if (Skill == null) continue;
+            CompoundTag One = SkillData.getCompound(SkillId);
+            Map<MaidSkillDataManager.SkillDataKey<?>, MaidSkillDataManager.Data> Inner = this.SkillDataKey.computeIfAbsent(Skill, k -> new HashMap<>());
+            for (String KeyId : One.getAllKeys()) {
+                MaidSkillDataManager.SkillDataKey<?> Key = MaidSkillDataManager.SkillDataKey.byId(ResourceLocation.parse(KeyId));
+                if (Key == null) continue;
+                MaidSkillDataManager.Data Value = Key.getValueType().create();
+                readSkillDataValue(One, Key, Value);
+                Inner.put(Key, Value);
             }
         }
+    }
+    private static void readSkillDataValue(CompoundTag Nbt, MaidSkillDataManager.SkillDataKey<?> Key, MaidSkillDataManager.Data Value) {
+        Key.getValueType().read(Nbt, Key.getId().toString(), Value);
     }
 }

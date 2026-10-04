@@ -1,4 +1,6 @@
 {
   "max_stacks": 12,
-  "consumption": 50.0
+  "consumption": 30.0,
+  "reinforce_chance": 0.15,
+  "require_heavy_rain_enchantment": false
 }

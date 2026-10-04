@@ -1,35 +1,60 @@
 package net.EFTLM.EF.Render.Gui;
 
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
+import net.EFTLM.EF.Capability.MaidPatch;
+import net.EFTLM.EF.Network.Packet.Server.ForgetMaidSkillPacket;
+import net.EFTLM.EF.Network.PacketSend;
 import net.EFTLM.EF.Skill.MaidSkill;
+import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import javax.annotation.Nullable;
 import java.util.List;
 public class MaidSkillBookScreen extends Screen {
     protected final MaidSkill Skill;
     protected final Screen ParentScreen;
+    protected final int MaidId;
     protected final MaidSkillBookScreen.SkillTooltipList skillTooltipList;
     protected double customScale;
     private static final ResourceLocation SKILLBOOK_BACKGROUND = EpicFightMod.identifier("textures/gui/screen/skillbook.png");
     public MaidSkillBookScreen(MaidSkill Skill, Screen ParentScreen) {
+        this(Skill, ParentScreen, -1);
+    }
+    public MaidSkillBookScreen(MaidSkill Skill, Screen ParentScreen, int MaidId) {
         super(Component.empty());
         this.Skill = Skill;
         this.ParentScreen = ParentScreen;
+        this.MaidId = MaidId;
         this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0, 0, 9);
-        List<FormattedCharSequence> list = Minecraft.getInstance().font.split(this.Skill.getDesc(), 148);
+        List<FormattedCharSequence> list = Minecraft.getInstance().font.split(this.Skill.getDesc(this.resolveMaidPatch()), 148);
         list.forEach(skillTooltipList::add);
+    }
+    @Nullable
+    protected MaidPatch<?> resolveMaidPatch() {
+        if (this.MaidId < 0) return null;
+        Level level = Minecraft.getInstance().level;
+        if (level == null) return null;
+        Entity entity = level.getEntity(this.MaidId);
+        if (!(entity instanceof EntityMaid maid)) return null;
+        return EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
     }
     @Override
     protected void init() {
@@ -44,10 +69,25 @@ public class MaidSkillBookScreen extends Screen {
         this.skillTooltipList.updateSize(210, 400, this.height / 2 - 100, (this.height + 80) / 2);
         this.skillTooltipList.setLeftPos(this.width / 2 - 40);
         this.addRenderableWidget(this.skillTooltipList);
+        if (this.canForget()) {
+            this.addRenderableWidget(new ForgetButton(Button.builder(Component.translatable("gui.ef_tlm.button.forget_skill"), button -> this.forgetSkill())
+                    .pos(this.width / 2 + 54, this.height / 2 + 90)
+                    .size(80, 20)));
+        }
+    }
+    protected boolean canForget() {
+        if (this.MaidId < 0 || this.Skill == null) return false;
+        return !(this.Skill instanceof WeaponInnateSkill);
+    }
+    protected void forgetSkill() {
+        if (!this.canForget()) return;
+        PacketSend.sendToServer(new ForgetMaidSkillPacket(this.MaidId, this.Skill.getRegistryName()));
+        this.onClose();
     }
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         this.render(guiGraphics, mouseX, mouseY, partialTicks, false);
     }
+    @SuppressWarnings("UnstableApiUsage")
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks, boolean asBackground) {
         guiGraphics.pose().pushPose();
         Window window = Minecraft.getInstance().getWindow();
@@ -111,6 +151,28 @@ public class MaidSkillBookScreen extends Screen {
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
         Window window = Minecraft.getInstance().getWindow();
         return super.mouseScrolled((int)(pMouseX * window.getGuiScale() / this.customScale), (int)(pMouseY * window.getGuiScale() / this.customScale), pDelta);
+    }
+    protected static class ForgetButton extends Button {
+        protected ForgetButton(Button.Builder builder) {
+            super(builder);
+        }
+        @Override
+        protected void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+            Minecraft minecraft = Minecraft.getInstance();
+            guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
+            int texX = 106;
+            if (this.isHoveredOrFocused() || !this.isActive()) {
+                texX = 156;
+            }
+            guiGraphics.pose().pushPose();
+            guiGraphics.blitNineSliced(SKILLBOOK_BACKGROUND, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 45, 15, texX, 193);
+            guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            guiGraphics.pose().popPose();
+            int color = this.getFGColor();
+            this.renderString(guiGraphics, minecraft.font, color | Mth.ceil(this.alpha * 255.0F) << 24);
+        }
     }
     protected class SkillTooltipList extends ObjectSelectionList<SkillTooltipList.TooltipLine> {
         protected SkillTooltipList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {

@@ -69,4 +69,3 @@ public class RandomAltarSerializer implements RecipeSerializer<RandomAltarRecipe
         }
     }
 }
-

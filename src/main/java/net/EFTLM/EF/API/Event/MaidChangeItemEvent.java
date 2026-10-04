@@ -7,4 +7,3 @@ public class MaidChangeItemEvent extends AbstractMaidEvent {
         super(MaidPatch);
     }
 }
-

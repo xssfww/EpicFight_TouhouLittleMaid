@@ -8,7 +8,7 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.EFNCompat;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
-import net.EFTLM.EF.Skill.MaidSkillDataManager;
+import net.EFTLM.EF.Skill.MaidSkillDataKeys;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -26,8 +26,6 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import java.util.List;
 import java.util.Map;
 public class Step extends MaidSkill {
-    public static final MaidSkillDataManager.SkillDataKey<Integer> STEP_RESTORE_COUNTER =
-            MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     protected final Map<Item, List<AnimationManager.AnimationAccessor<? extends DodgeAnimation>>> ItemDodgeMotions;
     protected final Map<WeaponCategory, List<AnimationManager.AnimationAccessor<? extends DodgeAnimation>>> WeaponDodgeMotions;
     public static Step.Builder createStepBuilder() {
@@ -61,7 +59,7 @@ public class Step extends MaidSkill {
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {
-        event.registerData(this,STEP_RESTORE_COUNTER,0);
+        event.registerData(this,MaidSkillDataKeys.STEP_RESTORE_COUNTER);
     }
     @Override
     public void onMaidTick(MaidTickEvent event,MaidPatch<?> patch) {
@@ -71,9 +69,9 @@ public class Step extends MaidSkill {
         LivingEntityPatch<?> targetPatch = EpicFightCapabilities.getEntityPatch(Target, LivingEntityPatch.class);
         if (targetPatch == null) return;
         int Phase = targetPatch.getEntityState().getLevel();
-        if (patch.getDataValue(this,STEP_RESTORE_COUNTER) != null) {
-            int Counter = patch.getDataValue(this, STEP_RESTORE_COUNTER);
-            patch.setData(this, STEP_RESTORE_COUNTER, Counter + 1);
+        if (patch.getDataValue(this,MaidSkillDataKeys.STEP_RESTORE_COUNTER) != null) {
+            int Counter = patch.getDataValue(this, MaidSkillDataKeys.STEP_RESTORE_COUNTER);
+            patch.setData(this, MaidSkillDataKeys.STEP_RESTORE_COUNTER, Counter + 1);
             if (Phase > 0 && Phase < 3) {
                 List<AnimationManager.AnimationAccessor<? extends DodgeAnimation>> dodgeAnimations = getDodgeAnimations(patch);
                 if (dodgeAnimations == null || dodgeAnimations.size() < 4) return;
@@ -109,7 +107,7 @@ public class Step extends MaidSkill {
                     return;
                 }
                 if (patch.getOriginal().tickCount - Counter > 10) {
-                    patch.setData(this, STEP_RESTORE_COUNTER, patch.getOriginal().tickCount);
+                    patch.setData(this, MaidSkillDataKeys.STEP_RESTORE_COUNTER, patch.getOriginal().tickCount);
                     AttributeInstance Weight = patch.getOriginal().getAttribute(EpicFightAttributes.WEIGHT.get());
                     if (Weight != null) {
                         patch.setStamina((float) (patch.getStamina() - (Weight.getValue() * 0.1F)));

@@ -19,4 +19,3 @@ public class EFTLM_Tab {
                 .icon(() -> new ItemStack(EFTLM_Item.SKILLBOOK.get())).build());
     }
 }
-

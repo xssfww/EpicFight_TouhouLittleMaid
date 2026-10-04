@@ -1,0 +1,14 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "net.EFTLM.Mixin.EFN",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ef_tlm.refmap.json",
+  "plugin": "net.EFTLM.MixinPlugin.EFNMixinPlugin",
+  "mixins": [
+    "SummonedSwordPatchInMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

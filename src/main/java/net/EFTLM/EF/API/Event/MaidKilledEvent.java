@@ -19,4 +19,3 @@ public class MaidKilledEvent extends AbstractMaidEvent {
         return this.damagesource;
     }
 }
-

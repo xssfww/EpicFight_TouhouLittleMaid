@@ -75,6 +75,10 @@ public abstract class MaidSkill {
     }
     public void onInit(MaidSkillInitEvent event) {
     }
+    public void onRemove(MaidChangeItemEvent event) {
+        MaidPatch<?> MaidPatch = event.getMaidPatch();
+        MaidPatch.removeData(this);
+    }
     public boolean canExecute(MaidPatch<?> MaidPatch) {
         return MaidPatch.isFightMode();
     }
@@ -90,8 +94,16 @@ public abstract class MaidSkill {
     public MutableComponent getTitle() {
         return Component.translatable(String.format("maid_skill.%s.%s", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
     }
-    public MutableComponent getDesc() {
-        return Component.translatable(String.format("maid_skill.%s.%s.desc", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+    public MutableComponent getDesc(MaidPatch<?> MaidPatch) {
+        String Key = String.format("maid_skill.%s.%s.desc", this.getRegistryName().getNamespace(), this.getRegistryName().getPath());
+        Object[] Args = this.getDescArguments(MaidPatch);
+        if (Args == null || Args.length == 0) {
+            return Component.translatable(Key);
+        }
+        return Component.translatable(Key, Args);
+    }
+    public Object[] getDescArguments(MaidPatch<?> MaidPatch) {
+        return null;
     }
     public ResourceLocation getIcon() {
         return ResourceLocation.fromNamespaceAndPath(this.getRegistryName().getNamespace(), String.format("textures/gui/skill/%s.png", this.getRegistryName().getPath()));

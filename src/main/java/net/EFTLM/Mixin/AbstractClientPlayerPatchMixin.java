@@ -34,4 +34,3 @@ public abstract class AbstractClientPlayerPatchMixin <T extends AbstractClientPl
         }
     }
 }
-

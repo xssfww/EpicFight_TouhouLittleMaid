@@ -1,6 +1,8 @@
 package net.EFTLM.EF.Network;
 
 import net.EFTLM.EF.Network.Packet.BasePacket;
+import net.EFTLM.EF.Network.Packet.Client.SyncMaidSkillsPacket;
+import net.EFTLM.EF.Network.Packet.Server.ForgetMaidSkillPacket;
 import net.EFTLM.EF.Network.Packet.Server.OpenMaidSkillScreenPacket;
 import net.EFTLM.EFTLM;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,6 +22,8 @@ public class PacketHandler {
     );
     public static synchronized void RegisterManager() {
         ServerRegister(OpenMaidSkillScreenPacket.class, OpenMaidSkillScreenPacket::encode, OpenMaidSkillScreenPacket::decode, OpenMaidSkillScreenPacket::handle);
+        ServerRegister(ForgetMaidSkillPacket.class, ForgetMaidSkillPacket::encode, ForgetMaidSkillPacket::decode, ForgetMaidSkillPacket::handle);
+        ClientRegister(SyncMaidSkillsPacket.class, SyncMaidSkillsPacket::decode);
     }
     protected static <MSG extends BasePacket> void ClientRegister(final Class<MSG> packet, Function<FriendlyByteBuf, MSG> decoder) {
         INSTANCE.messageBuilder(packet, index++).encoder(BasePacket::encode).decoder(decoder).consumerMainThread(BasePacket::handle).add();

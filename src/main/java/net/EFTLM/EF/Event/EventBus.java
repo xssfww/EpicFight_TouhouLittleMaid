@@ -145,17 +145,17 @@ public class EventBus {
         @SubscribeEvent
         public static void MaidAttack(MaidAttackEvent event) {
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
-            forEachLearnedSkill(maidPatch, skill -> skill.MaidAttack(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.MaidAttack(event));
         }
         @SubscribeEvent
         public static void MaidHurt(MaidHurtEvent event) {
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
-            forEachLearnedSkill(maidPatch, skill -> skill.MaidHurt(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.MaidHurt(event));
         }
         @SubscribeEvent
         public static void MaidDamage(MaidDamageEvent event) {
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
-            forEachLearnedSkill(maidPatch, skill -> skill.MaidDamage(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.MaidDamage(event));
         }
         @SubscribeEvent
         public static void MaidDeath(MaidDeathEvent event) {
@@ -165,53 +165,70 @@ public class EventBus {
         @SubscribeEvent
         public static void MaidTick(MaidTickEvent event) {
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(event.getMaid(), MaidPatch.class);
-            forEachLearnedSkill(maidPatch, skill -> skill.MaidTick(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.MaidTick(event));
         }
         @SubscribeEvent
         public static void MaidHurtTargetPre(MaidHurtTargetEvent.Pre event) {
             MaidPatch<?> maidPatch = event.getMaidPatch();
-            forEachLearnedSkill(maidPatch, skill -> skill.onHurtTargetPre(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.onHurtTargetPre(event));
         }
         @SubscribeEvent
         public static void MaidHurtTargetPost(MaidHurtTargetEvent.Post event) {
             MaidPatch<?> maidPatch = event.getMaidPatch();
-            forEachLearnedSkill(maidPatch, skill -> skill.onHurtTargetPost(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.onHurtTargetPost(event));
         }
         @SubscribeEvent
         public static void MaidKillTarget(MaidKilledEvent event) {
             MaidPatch<?> maidPatch = event.getMaidPatch();
-            forEachLearnedSkill(maidPatch, skill -> skill.onKillTarget(event));
+            forEachExecutableSkill(maidPatch, skill -> skill.onKillTarget(event));
         }
         @SubscribeEvent
         public static void MaidChangeItem(MaidChangeItemEvent event) {
             MaidPatch<?> maidPatch = event.getMaidPatch();
             if (maidPatch == null) return;
             if (!(maidPatch.getOriginal().level() instanceof ServerLevel)) return;
+            WeaponInnateSkill targetWeaponSkill = maidPatch.getWeaponInnateSkill();
+            ResourceLocation targetSkill = targetWeaponSkill != null ? targetWeaponSkill.getRegistryName() : null;
             List<ResourceLocation> toRemove = new ArrayList<>();
-            List<ResourceLocation> toAdd = new ArrayList<>();
             forEachLearnedSkill(maidPatch, skill -> {
-                if (skill instanceof WeaponInnateSkill innate) {
+                if (skill instanceof WeaponInnateSkill innate && !innate.getRegistryName().equals(targetSkill)) {
                     innate.onRemove(event);
                     toRemove.add(innate.getRegistryName());
                 }
             });
-            Item currentItem = maidPatch.CurrentMain;
-            if (currentItem != null && MaidSkillManager.hasSkillFor(currentItem)) {
-                toAdd.add(MaidSkillManager.getSkillFor(currentItem).getRegistryName());
-            }
             toRemove.forEach(maidPatch::removeLearnedSkill);
-            toAdd.forEach(maidPatch::addLearnedSkill);
+            if (targetSkill != null) {
+                maidPatch.addLearnedSkill(targetSkill);
+            }
         }
         @SubscribeEvent
         public static void MaidSkillInit(MaidSkillInitEvent event) {
             MaidPatch<?> maidPatch = event.getMaidPatch();
             if (maidPatch == null) return;
             if (!(maidPatch.getOriginal().level() instanceof ServerLevel)) return;
-            forEachLearnedSkill(maidPatch, skill -> skill.onInit(event));
-            Item currentItem = maidPatch.CurrentMain;
-            if (currentItem != null && MaidSkillManager.hasSkillFor(currentItem)) {
-                maidPatch.addLearnedSkill(MaidSkillManager.getSkillFor(currentItem).getRegistryName());
+            ResourceLocation target = event.getSkillName();
+            if (target == null) {
+                forEachLearnedSkill(maidPatch, skill -> skill.onInit(event));
+            } else {
+                MaidSkill skill = MaidSkillManager.getSkillFor(target);
+                if (skill != null) {
+                    skill.onInit(event);
+                }
             }
+        }
+        @SubscribeEvent
+        public static void MaidSkillRemove(MaidSkillRemoveEvent event) {
+            MaidPatch<?> maidPatch = event.getMaidPatch();
+            if (maidPatch == null) return;
+            if (!(maidPatch.getOriginal().level() instanceof ServerLevel)) return;
+            MaidSkill skill = event.getSkill();
+            if (skill == null) return;
+            if (skill instanceof WeaponInnateSkill) {
+                event.setCanceled(true);
+                return;
+            }
+            maidPatch.removeLearnedSkill(skill.getRegistryName());
+            event.removeData();
         }
         @SubscribeEvent
         public static void MaidCombatBehaviors(CombatBehaviorsEvent event) {
@@ -225,11 +242,20 @@ public class EventBus {
             }
             EFNCompat.trySetWeaponMotions(event.getItemAttackMotions(), event.getItemStyleAttackMotions(), event.getItemArmatures());
         }
-        private static void forEachLearnedSkill(MaidPatch<?> patch, Consumer<MaidSkill> action) {
+        private static void forEachExecutableSkill(MaidPatch<?> patch, Consumer<MaidSkill> action) {
             if (patch == null) return;
             for (ResourceLocation rl : patch.getLearnedSkills()) {
                 MaidSkill skill = MaidSkillManager.getSkillFor(rl);
                 if (skill != null && skill.canExecute(patch)) {
+                    action.accept(skill);
+                }
+            }
+        }
+        private static void forEachLearnedSkill(MaidPatch<?> patch, Consumer<MaidSkill> action) {
+            if (patch == null) return;
+            for (ResourceLocation rl : patch.getLearnedSkills()) {
+                MaidSkill skill = MaidSkillManager.getSkillFor(rl);
+                if (skill != null) {
                     action.accept(skill);
                 }
             }

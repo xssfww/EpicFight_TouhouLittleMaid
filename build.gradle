@@ -69,6 +69,7 @@ minecraft {
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
+    config "${mod_id}.efn.mixins.json"
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -99,7 +100,7 @@ dependencies {
     implementation fg.deobf("libs:ef_skin:1.0.0")
     implementation fg.deobf("libs:ef_anim_phy:1.0.0")
     implementation fg.deobf("maven.modrinth:epic-fight:${epicfight_version}")
-    implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:7619938")
+    implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:8849430")
     implementation fg.deobf("curse.maven:touhou-little-maid-355044:8061847")
     implementation fg.deobf("libs:YSM_GEO_Compat:1.0.0")
     jarJar 'libs:YSM_GEO_Compat:[1.0.0,1.0.0]'

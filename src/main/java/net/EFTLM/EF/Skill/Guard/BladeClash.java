@@ -8,7 +8,7 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Compat.EFNCompat;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
-import net.EFTLM.EF.Skill.MaidSkillDataManager;
+import net.EFTLM.EF.Skill.MaidSkillDataKeys;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,17 +24,13 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageTypeTags;
 public class BladeClash extends MaidSkill {
-    public static final MaidSkillDataManager.SkillDataKey<Float> CLASH_PENALTY =
-            MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.FLOAT);
-    public static final MaidSkillDataManager.SkillDataKey<Integer> CLASH_RESTORE_COUNTER =
-            MaidSkillDataManager.SkillDataKey.createDataKey(MaidSkillDataManager.SkillDataKey.INTEGER);
     public BladeClash(MaidSkillBuilder<? extends MaidSkill> builder) {
         super(builder);
     }
     @Override
     public void onInit(MaidSkillInitEvent event) {
-        event.registerData(this,CLASH_PENALTY,0F);
-        event.registerData(this,CLASH_RESTORE_COUNTER,0);
+        event.registerData(this,MaidSkillDataKeys.BLADE_CLASH_PENALTY);
+        event.registerData(this,MaidSkillDataKeys.BLADE_CLASH_RESTORE_COUNTER);
     }
     @Override
     public void onMaidTick(MaidTickEvent event,MaidPatch<?> patch) {
@@ -42,13 +38,13 @@ public class BladeClash extends MaidSkill {
         MaidPatch<?> MaidPatch = EpicFightCapabilities.getEntityPatch(Maid, MaidPatch.class);
         if (Maid.level() instanceof ServerLevel) {
             if (MaidPatch != null) {
-                if (MaidPatch.getDataValue(this,CLASH_RESTORE_COUNTER) != null) {
-                    int Counter = MaidPatch.getDataValue(this,CLASH_RESTORE_COUNTER);
-                    if (MaidPatch.getDataValue(this,CLASH_PENALTY) != null) {
-                        float Penalty = MaidPatch.getDataValue(this,CLASH_PENALTY);
+                if (MaidPatch.getDataValue(this,MaidSkillDataKeys.BLADE_CLASH_RESTORE_COUNTER) != null) {
+                    int Counter = MaidPatch.getDataValue(this,MaidSkillDataKeys.BLADE_CLASH_RESTORE_COUNTER);
+                    if (MaidPatch.getDataValue(this,MaidSkillDataKeys.BLADE_CLASH_PENALTY) != null) {
+                        float Penalty = MaidPatch.getDataValue(this,MaidSkillDataKeys.BLADE_CLASH_PENALTY);
                         if (Penalty > 0.0F) {
                             if (Maid.tickCount - Counter > 40) {
-                                MaidPatch.setData(this,CLASH_PENALTY, 0.0F);
+                                MaidPatch.setData(this,MaidSkillDataKeys.BLADE_CLASH_PENALTY, 0.0F);
                             }
                         }
                     }
@@ -77,8 +73,8 @@ public class BladeClash extends MaidSkill {
                     impact = EFSource.calculateImpact();
                     knockback += Math.min(impact * 0.1F, 1.0F);
                 }
-                if (MaidPatch.getDataValue(this, CLASH_PENALTY) != null) {
-                    float penalty = MaidPatch.getDataValue(this, CLASH_PENALTY);
+                if (MaidPatch.getDataValue(this, MaidSkillDataKeys.BLADE_CLASH_PENALTY) != null) {
+                    float penalty = MaidPatch.getDataValue(this, MaidSkillDataKeys.BLADE_CLASH_PENALTY);
                     float consumeAmount = penalty * impact;
                     if (MaidPatch.hasStamina(consumeAmount)) {
                         if (Source.getSourcePosition() != null) {
@@ -89,8 +85,8 @@ public class BladeClash extends MaidSkill {
                         }
                         MaidPatch.playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
                         MaidPatch.setStamina(MaidPatch.getStamina() - consumeAmount);
-                        MaidPatch.setData(this, CLASH_PENALTY, penalty + 0.1F);
-                        MaidPatch.setData(this, CLASH_RESTORE_COUNTER, Maid.tickCount);
+                        MaidPatch.setData(this, MaidSkillDataKeys.BLADE_CLASH_PENALTY, penalty + 0.1F);
+                        MaidPatch.setData(this, MaidSkillDataKeys.BLADE_CLASH_RESTORE_COUNTER, Maid.tickCount);
                         EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument((ServerLevel) Maid.level(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, Maid, Source.getDirectEntity());
                         event.setCanceled(true);
                     }

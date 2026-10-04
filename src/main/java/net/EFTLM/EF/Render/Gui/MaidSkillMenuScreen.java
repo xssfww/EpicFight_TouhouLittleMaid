@@ -10,6 +10,7 @@ import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -94,7 +95,7 @@ public class MaidSkillMenuScreen extends AbstractMaidContainerGui<MaidSkillConta
             MaidSkill skill = MaidSkillManager.getSkillFor(rl);
             if (skill != null) {
                 if (Minecraft.getInstance().player != null) {
-                    Minecraft.getInstance().setScreen(new MaidSkillBookScreen(skill,this));
+                    Minecraft.getInstance().setScreen(new MaidSkillBookScreen(skill, this, maid.getId()));
                 }
             }
         }
@@ -163,6 +164,13 @@ public class MaidSkillMenuScreen extends AbstractMaidContainerGui<MaidSkillConta
                 btn.active = false;
             }
         }
+    }
+    public void refreshSkillList(CompoundTag nbt) {
+        if (nbt != null) {
+            this.getMenu().getNBT().merge(nbt);
+        }
+        updatePageButtons();
+        updateSkillButtons();
     }
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {

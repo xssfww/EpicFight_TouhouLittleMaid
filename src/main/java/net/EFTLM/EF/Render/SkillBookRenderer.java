@@ -29,6 +29,9 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
     public static final ResourceLocation DEFAULT_ICON = ResourceLocation.fromNamespaceAndPath(EFTLM.MODID, "textures/item/skillbook.png");
     private static final float MIN_Z = 7.5f / 16f;
     private static final float MAX_Z = 8.5f / 16f;
+    private static final float WALL_NX = 0f;
+    private static final float WALL_NY = 0f;
+    private static final float WALL_NZ = 1f;
     private static SkillBookRenderer INSTANCE;
     private final Map<ResourceLocation, List<float[]>> cache = new ConcurrentHashMap<>();
     public static SkillBookRenderer getInstance() {
@@ -156,7 +159,7 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
                 addFace(out,
                         x0, y, zMin, x0, y, zMax, x1, y, zMax, x1, y, zMin,
                         u0, v0, u0, v1, u1, v1, u1, v0,
-                        0, 1, 0);
+                        WALL_NX, WALL_NY, WALL_NZ);
                 break;
             }
             case 1: {
@@ -168,7 +171,7 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
                 addFace(out,
                         x0, y, zMax, x0, y, zMin, x1, y, zMin, x1, y, zMax,
                         u0, v0, u0, v1, u1, v1, u1, v0,
-                        0, -1, 0);
+                        WALL_NX, WALL_NY, WALL_NZ);
                 break;
             }
             case 2: {
@@ -180,7 +183,7 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
                 addFace(out,
                         x, yTop, zMax, x, yBot, zMax, x, yBot, zMin, x, yTop, zMin,
                         u0, v1, u0, v0, u1, v0, u1, v1,
-                        1, 0, 0);
+                        WALL_NX, WALL_NY, WALL_NZ);
                 break;
             }
             case 3: {
@@ -192,7 +195,7 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
                 addFace(out,
                         x, yTop, zMin, x, yBot, zMin, x, yBot, zMax, x, yTop, zMax,
                         u0, v1, u0, v0, u1, v0, u1, v1,
-                        -1, 0, 0);
+                        WALL_NX, WALL_NY, WALL_NZ);
                 break;
             }
         }
