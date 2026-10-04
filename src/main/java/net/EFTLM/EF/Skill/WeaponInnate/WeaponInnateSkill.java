@@ -2,7 +2,6 @@ package net.EFTLM.EF.Skill.WeaponInnate;
 
 import com.github.tartaricacid.touhoulittlemaid.api.event.MaidTickEvent;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import net.EFTLM.EF.API.Event.MaidChangeItemEvent;
 import net.EFTLM.EF.API.Event.MaidHurtTargetEvent;
 import net.EFTLM.EF.API.Event.MaidSkillInitEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
