@@ -2,7 +2,6 @@ package net.EFTLM.Mixin;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.EFTLM.EF.Capability.MaidPatch;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,8 +11,11 @@ import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-@Mixin(value = ServerPlayerPatch.class,remap = false)
-public abstract class ServerPlayerPatchMixin extends PlayerPatch<ServerPlayer> {
+
+@Mixin(value = ServerPlayerPatch.class, remap = false)
+public abstract class ServerPlayerPatchMixin {
+    // 1.21.1: no longer extends PlayerPatch — the Epic Fight 21 patch constructor requires the
+    // original player, and this mixin only needs the injected method.
     @Inject(method = "tryHurt", at = @At("HEAD"), cancellable = true)
     public void InjectTryHurt(DamageSource damageSource, float amount, CallbackInfoReturnable<AttackResult> cir) {
         if (damageSource.getEntity() instanceof EntityMaid Maid) {

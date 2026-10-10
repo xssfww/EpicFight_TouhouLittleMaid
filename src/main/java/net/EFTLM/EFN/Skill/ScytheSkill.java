@@ -11,6 +11,7 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +27,7 @@ import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
-import yesman.epicfight.gameasset.EpicFightSounds;
+import yesman.epicfight.registry.entries.EpicFightSounds;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageTypeTags;
 import yesman.epicfight.world.damagesource.StunType;
@@ -70,8 +71,8 @@ public class ScytheSkill extends WeaponInnateSkill {
             }
         }
         if (animation == EFNScytheAnimations.SCYTHE_HARVEST) {
-            boolean hasCurse = target.hasEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD.get());
-            boolean hasBlessing = maidEntity.hasEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS.get());
+            boolean hasCurse = target.hasEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD);
+            boolean hasBlessing = maidEntity.hasEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS);
             if (!hasCurse && !hasBlessing) {
                 source.attachDamageModifier(ValueModifier.multiplier(0.25F));
             } else {
@@ -89,8 +90,8 @@ public class ScytheSkill extends WeaponInnateSkill {
         AnimationManager.AnimationAccessor<? extends StaticAnimation> animation = efSource.getAnimation();
         maidEntity.heal(event.getAmount() * HEAL_RATIO);
         if (animation == EFNScytheAnimations.SCYTHE_SCARLET_END) {
-            MobEffectInstance curse = target.getEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD.get());
-            MobEffectInstance blessing = maidEntity.getEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS.get());
+            MobEffectInstance curse = target.getEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD);
+            MobEffectInstance blessing = maidEntity.getEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS);
             int amplifier = 0;
             if (curse != null) {
                 amplifier = curse.getAmplifier() + 1;
@@ -109,17 +110,18 @@ public class ScytheSkill extends WeaponInnateSkill {
                     int phaseIndex = attackAnim.getPhaseOrderByTime(animPlayer.getElapsedTime());
                     if (phaseIndex == attackAnim.phases.length - 1) {
                         if (curse != null) {
-                            target.removeEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD.get());
+                            target.removeEffect(EFNMobEffectRegistry.CURSE_OF_BLOOD);
                         } else {
-                            maidEntity.removeEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS.get());
+                            maidEntity.removeEffect(EFNMobEffectRegistry.BLOOD_BLESSINGS);
                         }
                     }
                 }
             }
             return;
         }
-        boolean canBeAffected = target.canBeAffected(new MobEffectInstance(EFNMobEffectRegistry.CURSE_OF_BLOOD.get()));
-        MobEffect effectToApply = canBeAffected ? EFNMobEffectRegistry.CURSE_OF_BLOOD.get() : EFNMobEffectRegistry.BLOOD_BLESSINGS.get();
+        boolean canBeAffected = target.canBeAffected(new MobEffectInstance(EFNMobEffectRegistry.CURSE_OF_BLOOD));
+        // 1.21.1: EFN mob effects are Holder<MobEffect> (DeferredHolder) now, not raw MobEffect
+        Holder<MobEffect> effectToApply = canBeAffected ? EFNMobEffectRegistry.CURSE_OF_BLOOD : EFNMobEffectRegistry.BLOOD_BLESSINGS;
         LivingEntity effectCarrier = canBeAffected ? target : maidEntity;
         if (animation == EFNScytheAnimations.SCYTHE_AUTO1 ||
                 animation == EFNScytheAnimations.SCYTHE_AUTO3 ||
@@ -149,20 +151,20 @@ public class ScytheSkill extends WeaponInnateSkill {
             if (hadEffect) {
                 if (animation == EFNScytheAnimations.SCYTHE_DASH) {
                     int levelx = -1;
-                    MobEffectInstance dmgRed = maidEntity.getEffect(EFNMobEffectRegistry.DAMAGE_REDUCTION.get());
+                    MobEffectInstance dmgRed = maidEntity.getEffect(EFNMobEffectRegistry.DAMAGE_REDUCTION);
                     if (dmgRed != null) levelx = dmgRed.getAmplifier();
-                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.DAMAGE_REDUCTION.get(), 300, Mth.clamp(levelx + 25, 0, 75)));
+                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.DAMAGE_REDUCTION, 300, Mth.clamp(levelx + 25, 0, 75)));
                 } else if (animation == EFNScytheAnimations.SCYTHE_AIR_SLASH) {
                     int levelx = -1;
-                    MobEffectInstance atkSpeed = maidEntity.getEffect(EFNMobEffectRegistry.ATTACK_SPEED_INCREASE.get());
+                    MobEffectInstance atkSpeed = maidEntity.getEffect(EFNMobEffectRegistry.ATTACK_SPEED_INCREASE);
                     if (atkSpeed != null) levelx = atkSpeed.getAmplifier();
-                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.ATTACK_SPEED_INCREASE.get(), 300, Mth.clamp(levelx + 15, 0, 44)));
+                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.ATTACK_SPEED_INCREASE, 300, Mth.clamp(levelx + 15, 0, 44)));
                 } else if (animation == EFNScytheAnimations.SCYTHE_HARVEST) {
                     int levelx = -1;
-                    MobEffectInstance atkDmg = maidEntity.getEffect(EFNMobEffectRegistry.ATTACK_DAMAGE_INCREASE.get());
+                    MobEffectInstance atkDmg = maidEntity.getEffect(EFNMobEffectRegistry.ATTACK_DAMAGE_INCREASE);
                     if (atkDmg != null) levelx = atkDmg.getAmplifier();
-                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.ATTACK_DAMAGE_INCREASE.get(), 300, Mth.clamp(levelx + 15, 0, 89)));
-                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.SIN_STUN_IMMUNITY.get(), 60));
+                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.ATTACK_DAMAGE_INCREASE, 300, Mth.clamp(levelx + 15, 0, 89)));
+                    maidEntity.addEffect(new MobEffectInstance(EFNMobEffectRegistry.SIN_STUN_IMMUNITY, 60));
                     target.level().playSound(null, target.blockPosition(), EpicFightSounds.BLADE_RUSH_FINISHER.get(), SoundSource.HOSTILE);
                 }
             }
@@ -172,7 +174,7 @@ public class ScytheSkill extends WeaponInnateSkill {
     public void onMaidAttack(MaidAttackEvent event, MaidPatch<?> MaidPatch) {
         AnimationPlayer animation = MaidPatch.getAnimator().getPlayerFor(null);
         if (animation == null) return;
-        if (MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.DAMAGE_REDUCTION.get()) && animation.getRealAnimation().equals(EFNScytheAnimations.SCYTHE_HARVEST)) {
+        if (MaidPatch.getOriginal().hasEffect(EFNMobEffectRegistry.DAMAGE_REDUCTION) && animation.getRealAnimation().equals(EFNScytheAnimations.SCYTHE_HARVEST)) {
             if (event.getSource() instanceof EpicFightDamageSource EFSource) {
                 EFSource.setStunType(StunType.NONE);
             }

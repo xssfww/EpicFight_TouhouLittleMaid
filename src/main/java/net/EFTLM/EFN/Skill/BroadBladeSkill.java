@@ -13,6 +13,7 @@ import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -26,11 +27,12 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
-import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.registry.entries.EpicFightParticles;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.EpicFightDamageTypeTags;
@@ -104,7 +106,7 @@ public class BroadBladeSkill extends WeaponInnateSkill {
                     }
                 }
             }
-            if (maid.hasEffect(EFNMobEffectRegistry.BATTLE_CONTINUATION.get())) {
+            if (maid.hasEffect(EFNMobEffectRegistry.BATTLE_CONTINUATION)) {
                 efSource.addExtraDamage(EFNExtraDamageInstance.EXTRA_PERCENTAGE_DAMAGE.create(1.0F));
             }
         }
@@ -113,13 +115,13 @@ public class BroadBladeSkill extends WeaponInnateSkill {
     public void onKillTarget(MaidKilledEvent event) {
         MaidPatch<?> maidPatch = event.getMaidPatch();
         EntityMaid maid = maidPatch.getOriginal();
-        maid.addEffect(new MobEffectInstance(EFNMobEffectRegistry.GRADUAL_HEAL.get(), 40, 4));
+        maid.addEffect(new MobEffectInstance(EFNMobEffectRegistry.GRADUAL_HEAL, 40, 4));
         maid.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, 1));
         ItemStack item = maid.getMainHandItem();
         if (item.getItem() instanceof BroadBladeItem) {
-            CompoundTag tag = item.getOrCreateTag();
+            // 1.21.1: ItemStack NBT tags are data components now; item.getOrCreateTag() -> CustomData.update(...)
             int currentCount = BroadBladeItem.getKillCount(item);
-            tag.putInt("KillCount", currentCount + 1);
+            CustomData.update(DataComponents.CUSTOM_DATA, item, tag -> tag.putInt("KillCount", currentCount + 1));
         }
     }
     @Override

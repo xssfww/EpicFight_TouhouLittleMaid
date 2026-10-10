@@ -173,7 +173,7 @@ public class MaidSkillMenuScreen extends AbstractMaidContainerGui<MaidSkillConta
         updateSkillButtons();
     }
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (isMouseInsideSkillList(mouseX, mouseY)) {
             int totalSkills = getSkillCount();
             if (totalSkills > 0) {
@@ -190,7 +190,8 @@ public class MaidSkillMenuScreen extends AbstractMaidContainerGui<MaidSkillConta
                 }
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollY);
+        // 1.21.1: mouseScrolled gained a horizontal scroll delta (scrollX, scrollY)
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
     private int getPageSize() {
         return PAGE_SIZE;

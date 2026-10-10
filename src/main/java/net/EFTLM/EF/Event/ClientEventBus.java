@@ -13,19 +13,21 @@ import net.EFTLM.EF.Render.Gui.Widget.MaidSkillTabButton;
 import net.EFTLM.EF.Render.PatchedLivingMaidRenderer;
 import net.EFTLM.EFTLM;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import yesman.epicfight.api.client.event.EpicFightClientEventHooks;
+import yesman.epicfight.api.client.event.types.registry.RegisterPatchedRenderersEvent;
 import yesman.epicfight.client.gui.EntityUI;
+
 public class ClientEventBus {
-    @Mod.EventBusSubscriber(
+    @EventBusSubscriber(
             modid = EFTLM.MODID,
-            bus = Mod.EventBusSubscriber.Bus.FORGE,
+            bus = EventBusSubscriber.Bus.GAME,
             value = {Dist.CLIENT}
     )
     public static class ForgeEvents {
@@ -41,25 +43,31 @@ public class ClientEventBus {
             }
         }
     }
-    @Mod.EventBusSubscriber(
+
+    @EventBusSubscriber(
             modid = EFTLM.MODID,
-            bus = Mod.EventBusSubscriber.Bus.MOD,
+            bus = EventBusSubscriber.Bus.MOD,
             value = {Dist.CLIENT}
     )
     public static class ModEvents {
-        @SubscribeEvent
-        public static void RegisterPatchedRenderer(PatchedRenderersEvent.Add event) {
+        // Epic Fight 21.x posts this through its own event registry instead of the mod bus.
+        public static void RegisterPatchedRenderer(RegisterPatchedRenderersEvent.AddEntity event) {
             event.addPatchedEntityRenderer(InitEntities.MAID.get(), entityType -> new PatchedLivingMaidRenderer(event.getContext(), entityType));
         }
         @SubscribeEvent
         public static void RegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
             event.registerReloadListener(new EFTLM_Meshes());
         }
+        // 1.21.1: MenuScreens.register is private now, screens are registered through this event.
+        @SubscribeEvent
+        public static void RegisterMenuScreens(RegisterMenuScreensEvent event) {
+            event.register(EFTLM_Menu.MaidSkillMenu.get(), MaidSkillMenuScreen::new);
+        }
         @SubscribeEvent
         public static void ClientSetup(FMLClientSetupEvent event) {
+            EpicFightClientEventHooks.Registry.ADD_PATCHED_ENTITY.registerEvent(ModEvents::RegisterPatchedRenderer);
             EntityUI.ENTITY_UI_LIST.add(MaidHealthBar.Instance);
             EFTLM_Meshes.Load(Minecraft.getInstance().getResourceManager());
-            MenuScreens.register(EFTLM_Menu.MaidSkillMenu.get(), MaidSkillMenuScreen::new);
         }
     }
 }

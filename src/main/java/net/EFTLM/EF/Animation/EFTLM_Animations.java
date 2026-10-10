@@ -2,13 +2,13 @@ package net.EFTLM.EF.Animation;
 
 import com.merlin204.avalon.epicfight.animations.AvalonMovementAnimation;
 import net.EFTLM.EFTLM;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.model.armature.HumanoidArmature;
-@Mod.EventBusSubscriber(modid = EFTLM.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = EFTLM.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class EFTLM_Animations {
     public static AnimationManager.AnimationAccessor<StaticAnimation> Biped_Hug;
     public static AnimationManager.AnimationAccessor<StaticAnimation> Biped_Hug_Kneel;

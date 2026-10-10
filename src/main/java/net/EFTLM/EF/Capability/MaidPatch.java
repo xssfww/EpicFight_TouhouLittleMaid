@@ -15,10 +15,8 @@ import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.EFTLM.EF.Utils.CompoundTagManager;
 import net.EFTLM.TLM.Task.FightModeTask;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -29,11 +27,10 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -44,6 +41,8 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.model.armature.HumanoidArmature;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
+import yesman.epicfight.registry.entries.EpicFightExpandedEntityDataAccessors;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.*;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -52,13 +51,12 @@ import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.DodgeLocationIndicator;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.data.ExpandedSyncedData;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 import java.util.*;
 public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> implements INBTSerializable<CompoundTag> {
-    public static final EntityDataAccessor<Float> Stamina = SynchedEntityData.defineId(EntityMaid.class, EntityDataSerializers.FLOAT);
     protected static final String DEFAULT_MODEL_ID = "geckolib:winefox";
     protected Map<Item, CombatBehaviors.Builder<HumanoidMobPatch<?>>> ItemAttackMotions;
     protected Map<Item, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> ItemStyleAttackMotions;
@@ -70,36 +68,42 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
     protected List<ResourceLocation> LearnedSkills = new ArrayList<>();
     protected boolean hasFightAi;
     private boolean lastCheckState = false;
-    public MaidPatch() {
-        super(Factions.NEUTRAL);
+    public MaidPatch(T original) {
+        super(original, Factions.NEUTRAL);
+    }
+    // 1.21.1: stamina used to live in EntityMaid's own SynchedEntityData; 1.21 dropped
+    // SynchedEntityData#define/hasItem, so it now uses Epic Fight's expanded synched data, which the
+    // base patch syncs to tracking clients automatically (same as PlayerPatch does for players).
+    @Override
+    protected void registerExpandedEntityDataAccessors(ExpandedSyncedData expandedSynchedData) {
+        super.registerExpandedEntityDataAccessors(expandedSynchedData);
+        expandedSynchedData.register(EpicFightExpandedEntityDataAccessors.STAMINA);
     }
     public static void initAttribute(EntityAttributeModificationEvent event) {
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.ARMOR_NEGATION.get(), 0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.IMPACT.get(),0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STRIKES.get(),999);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.STUN_ARMOR.get(),20);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ATTACK_SPEED.get(), 0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_MAX_STRIKES.get(),0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get(),0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_IMPACT.get(),0);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STAMINA.get(),20);
-        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN.get(),1);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.ARMOR_NEGATION, 0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.IMPACT,0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STRIKES,999);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STUN_ARMOR,20);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ATTACK_SPEED, 0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_MAX_STRIKES,0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_ARMOR_NEGATION,0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.OFFHAND_IMPACT,0);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.MAX_STAMINA,20);
+        event.add(InitEntities.MAID.get(), EpicFightAttributes.STAMINA_REGEN,1);
     }
     public float getMaxStamina() {
-        AttributeInstance maxStamina = this.getOriginal().getAttribute(EpicFightAttributes.MAX_STAMINA.get());
+        AttributeInstance maxStamina = this.getOriginal().getAttribute(EpicFightAttributes.MAX_STAMINA);
         return (float)(maxStamina == null ? 0.0 : maxStamina.getValue());
     }
     public float getStamina() {
-        return this.getMaxStamina() <= 0.0F ? 0.0F : this.getOriginal().getEntityData().hasItem(Stamina) ? this.getOriginal().getEntityData().get(Stamina) : 0.0F;
+        return this.getMaxStamina() <= 0.0F ? 0.0F : this.getExpandedSynchedData().<Float>get(EpicFightExpandedEntityDataAccessors.STAMINA);
     }
     public boolean hasStamina(float amount) {
         return this.getStamina() >= amount;
     }
     public void setStamina(float value) {
-        if (this.getOriginal().getEntityData().hasItem(Stamina)) {
-            float amount = Mth.clamp(value, 0.0F, this.getMaxStamina());
-            this.getOriginal().getEntityData().set(Stamina, amount);
-        }
+        float amount = Mth.clamp(value, 0.0F, this.getMaxStamina());
+        this.getExpandedSynchedData().set(EpicFightExpandedEntityDataAccessors.STAMINA, amount);
     }
     public List<ResourceLocation> getLearnedSkills() {
         return this.LearnedSkills;
@@ -108,7 +112,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         if (!this.hasLearnedSkill(RegistryName)) {
             this.LearnedSkills.add(RegistryName);
             this.saveToPersistent();
-            MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this,RegistryName));
+            NeoForge.EVENT_BUS.post(new MaidSkillInitEvent(this,RegistryName));
         }
     }
     public void removeLearnedSkill(ResourceLocation RegistryName) {
@@ -147,13 +151,8 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRotO, yRot, partialTicks, 0.8F, 0.8F, 0.8F);
     }
     @Override
-    public void onConstructed(T entity) {
-        super.onConstructed(entity);
-        entity.getEntityData().define(Stamina, 0F);
-    }
-    @Override
-    public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
-        super.onJoinWorld(entity, event);
+    public void onJoinWorld(T entity, Level level, boolean worldgenSpawn) {
+        super.onJoinWorld(entity, level, worldgenSpawn);
         CompoundTag NBT = entity.getPersistentData();
         if (NBT.contains(CompoundTagManager.MaidCap)) {
             this.deserializeNBT(NBT);
@@ -163,8 +162,8 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         this.CurrentMain = Main;
         this.CurrentOff = Off;
         this.CurrentStyle = this.getHoldingItemStyle();
-        MinecraftForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
-        MinecraftForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
+        NeoForge.EVENT_BUS.post(new MaidSkillInitEvent(this));
+        NeoForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
     }
     @Override
     public HumanoidArmature getArmature() {
@@ -174,13 +173,15 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         }
         return (HumanoidArmature) this.armature;
     }
+    // 1.21.1: Epic Fight dropped EntityPatch#serverTick(LivingEvent.LivingTickEvent); the per-tick
+    // server hook is now preTickServer().
     @Override
-    public void serverTick(LivingEvent.LivingTickEvent event) {
-        super.serverTick(event);
+    public void preTickServer() {
+        super.preTickServer();
         if (!this.getOriginal().level().isClientSide()) {
             float stamina = this.getStamina();
             float maxStamina = this.getMaxStamina();
-            float staminaRegen = (float) this.getOriginal().getAttributeValue(EpicFightAttributes.STAMINA_REGEN.get());
+            float staminaRegen = (float) this.getOriginal().getAttributeValue(EpicFightAttributes.STAMINA_REGEN);
             if (this.getOriginal().isDeadOrDying()) {
                 this.tickDeath();
             }
@@ -205,7 +206,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
                     this.CurrentOff = Off;
                     this.CurrentStyle = style;
                     this.lastCheckState = stateCheck;
-                    MinecraftForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
+                    NeoForge.EVENT_BUS.post(new MaidChangeItemEvent(this));
                 }
                 if (!this.hasFightAi && !stateCheck) {
                     this.resetAi();
@@ -278,7 +279,7 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         this.ItemStyleAttackMotions = Maps.newHashMap();
         this.weaponAttackMotions = Maps.newHashMap();
         EFTLM_Behaviors.SetWeaponMotions(this.weaponAttackMotions, this.ItemArmatures);
-        MinecraftForge.EVENT_BUS.post(new CombatBehaviorsEvent(this.weaponAttackMotions, this.ItemStyleAttackMotions, this.ItemAttackMotions, this.ItemArmatures));
+        NeoForge.EVENT_BUS.post(new CombatBehaviorsEvent(this.weaponAttackMotions, this.ItemStyleAttackMotions, this.ItemAttackMotions, this.ItemArmatures));
     }
     @Override
     protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
@@ -448,7 +449,12 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         Map<MaidSkillDataManager.SkillDataKey<?>, ?> inner = this.SkillDataKey.get(skill);
         return inner != null && inner.containsKey(key);
     }
+    // 1.21.1: INBTSerializable now takes a HolderLookup.Provider. The provider-free overloads are kept
+    // because the rest of the mod (packets, commands, persistent data) calls them directly.
     @Override
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        return this.serializeNBT();
+    }
     public CompoundTag serializeNBT() {
         CompoundTag NBT = new CompoundTag();
         ListTag SkillsList = new ListTag();
@@ -480,6 +486,9 @@ public class MaidPatch<T extends EntityMaid> extends HumanoidMobPatch<T> impleme
         Key.getValueType().write(Nbt, Key.getId().toString(), Value);
     }
     @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag NBT) {
+        this.deserializeNBT(NBT);
+    }
     public void deserializeNBT(CompoundTag NBT) {
         CompoundTag MaidCap = NBT.getCompound(CompoundTagManager.MaidCap);
         CompoundTag Source = MaidCap.contains(CompoundTagManager.LearnedSkills) ? MaidCap : NBT;

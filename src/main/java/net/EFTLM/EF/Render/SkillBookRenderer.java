@@ -17,7 +17,6 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -51,18 +50,18 @@ public class SkillBookRenderer extends BlockEntityWithoutLevelRenderer {
         VertexConsumer vc = buffer.getBuffer(RenderType.entityCutoutNoCull(icon));
         PoseStack.Pose last = pose.last();
         Matrix4f mat = last.pose();
-        Matrix3f nrm = last.normal();
         final int bright = 0xF000F0;
         for (float[] q : quads) {
             float nx = q[20], ny = q[21], nz = q[22];
             for (int i = 0; i < 4; i++) {
-                vc.vertex(mat, q[i * 3], q[i * 3 + 1], q[i * 3 + 2])
-                        .color(255, 255, 255, 255)
-                        .uv(q[12 + i * 2], q[12 + i * 2 + 1])
-                        .overlayCoords(overlay)
-                        .uv2(bright)
-                        .normal(nrm, nx, ny, nz)
-                        .endVertex();
+                // 1.21.1: vertex(Matrix4f,..)/color/uv/overlayCoords/uv2/normal(Matrix3f,..)/endVertex
+                // became addVertex(Matrix4f,..)/setColor/setUv/setOverlay/setLight/setNormal(Pose,..)
+                vc.addVertex(mat, q[i * 3], q[i * 3 + 1], q[i * 3 + 2])
+                        .setColor(255, 255, 255, 255)
+                        .setUv(q[12 + i * 2], q[12 + i * 2 + 1])
+                        .setOverlay(overlay)
+                        .setLight(bright)
+                        .setNormal(last, nx, ny, nz);
             }
         }
     }

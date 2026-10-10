@@ -1,7 +1,7 @@
 package net.EFTLM.EF.API;
 
 import net.EFTLM.EF.Capability.MaidPatch;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 public class AbstractMaidEvent extends Event {
     private final MaidPatch<?> MaidPatch;
     public AbstractMaidEvent(MaidPatch<?> MaidPatch) {

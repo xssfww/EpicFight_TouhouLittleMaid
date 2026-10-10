@@ -3,6 +3,9 @@ package net.EFTLM.EF.Capability;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import yesman.epicfight.api.animation.LivingMotions;
 public class ClientMaidPatch extends MaidPatch<EntityMaid> {
+    public ClientMaidPatch(EntityMaid original) {
+        super(original);
+    }
     @Override
     public boolean overrideRender() {
         if (this.CheckState()) {

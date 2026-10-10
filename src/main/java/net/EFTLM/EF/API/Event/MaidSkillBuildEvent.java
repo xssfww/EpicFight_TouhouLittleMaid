@@ -6,10 +6,9 @@ import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.GenericEvent;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.event.IModBusEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.event.IModBusEvent;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import java.util.Map;
@@ -54,14 +53,14 @@ public class MaidSkillBuildEvent extends Event implements IModBusEvent {
     }
     private <S extends MaidSkill, B extends MaidSkillBuilder<?>> S createSkill(ResourceLocation RegisterName, Function<B, S> constructor, B builder) {
         builder.setRegistryName(RegisterName);
-        ModLoader.get().postEvent(new SkillCreateEvent<>(builder));
+        // 1.21.1: ModLoader.get() is gone, ModLoader.postEvent is static
+        ModLoader.postEvent(new SkillCreateEvent<>(builder));
         return constructor.apply(builder);
     }
-    @SuppressWarnings("unchecked")
-    public static class SkillCreateEvent<B extends MaidSkillBuilder<?>> extends GenericEvent<B> implements IModBusEvent {
+    // 1.21.1: GenericEvent was removed; the event bus now dispatches generic events by their erased class
+    public static class SkillCreateEvent<B extends MaidSkillBuilder<?>> extends Event implements IModBusEvent {
         private final B builder;
         private SkillCreateEvent(B builder) {
-            super((Class<B>) builder.getClass());
             this.builder = builder;
         }
         public B getSkillBuilder() {

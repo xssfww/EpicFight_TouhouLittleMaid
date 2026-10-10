@@ -2,8 +2,6 @@ package net.EFTLM.EF.Compat;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.google.common.collect.ImmutableMap;
-import com.guhao.efn_enhance.entity.fakeman.FakeManEntity;
-import com.guhao.efn_enhance.gameassets.animations.EFN_ESekiroAnimations;
 import com.hm.efn.entity.effect.BlastSummonedSwordEntity;
 import com.hm.efn.entity.effect.HeavyRainSwordEntity;
 import com.hm.efn.entity.effect.SummonedSwordEntity_In;
@@ -66,10 +64,10 @@ public class EFNCompat {
             Internal.setupCreate(event);
         }
     }
+    // 1.21.1: Nightfall-Enhance (com.guhao.efn_enhance) has no 1.21.1 build, so the fake-man /
+    // "open mortal blade" summon that this method drove was dropped. Kept as a no-op so callers
+    // (Kusabimaru) keep their public shape.
     public static void summonFakeMan(LivingEntityPatch<?> Patch, AssetAccessor<? extends StaticAnimation> animation, float transitionTimeModifier) {
-        if (CompatModList.LoadedEFN() && CompatModList.LoadedEFN_Enhance()) {
-            InternalEnhance.summonFakeMan(Patch, animation, transitionTimeModifier);
-        }
     }
     public static boolean canSummonAtWaist(LivingEntityPatch<?> Patch) {
         if (CompatModList.LoadedEFN()) {
@@ -150,9 +148,6 @@ public class EFNCompat {
     }
     public static boolean isSpecialAnimation(MaidPatch<?> patch) {
         if (CompatModList.LoadedEFN()) {
-            if (CompatModList.LoadedEFN_Enhance()) {
-                return Internal.isSpecialAnimation(patch) || InternalEnhance.isSpecialAnimation(patch);
-            }
             return Internal.isSpecialAnimation(patch);
         }
         return false;
@@ -267,7 +262,8 @@ public class EFNCompat {
             }
         }
         static void clearMeenEffect(LivingEntityPatch<?> Patch) {
-            Patch.getOriginal().removeEffect(EFNMobEffectRegistry.MEEN_LANCE.get());
+            // 1.21.1: EFN effects are Holder<MobEffect> (DeferredHolder) now
+            Patch.getOriginal().removeEffect(EFNMobEffectRegistry.MEEN_LANCE);
         }
         static void summonAtWaist(LivingEntityPatch<?> Patch) {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
@@ -339,7 +335,7 @@ public class EFNCompat {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
                 EntityMaid owner = MaidPatch.getOriginal();
                 if (owner.level() instanceof ServerLevel) {
-                    return owner.hasEffect(EFNMobEffectRegistry.BLODDLUST.get());
+                    return owner.hasEffect(EFNMobEffectRegistry.BLODDLUST);
                 }
             }
             return false;
@@ -348,7 +344,7 @@ public class EFNCompat {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
                 EntityMaid owner = MaidPatch.getOriginal();
                 if (owner.level() instanceof ServerLevel) {
-                    owner.addEffect(new MobEffectInstance(EFNMobEffectRegistry.BLODDLUST.get(),-1));
+                    owner.addEffect(new MobEffectInstance(EFNMobEffectRegistry.BLODDLUST,-1));
                 }
             }
         }
@@ -356,29 +352,9 @@ public class EFNCompat {
             if (Patch instanceof MaidPatch<?> MaidPatch) {
                 EntityMaid owner = MaidPatch.getOriginal();
                 if (owner.level() instanceof ServerLevel) {
-                    owner.removeEffect(EFNMobEffectRegistry.BLODDLUST.get());
+                    owner.removeEffect(EFNMobEffectRegistry.BLODDLUST);
                 }
             }
-        }
-    }
-    protected static class InternalEnhance {
-        static void summonFakeMan(LivingEntityPatch<?> Patch, AssetAccessor<? extends StaticAnimation> animation, float transitionTimeModifier) {
-            if (Patch instanceof MaidPatch<?> MaidPatch) {
-                if (MaidPatch.getOriginal().level() instanceof ServerLevel Level) {
-                    PlayerPatch<?> Owner = MaidPatch.getOwnerPatch();
-                    if (Owner instanceof ServerPlayerPatch ServerPatch) {
-                        FakeManEntity FakeMan = new FakeManEntity(ServerPatch.getOriginal(), animation, transitionTimeModifier);
-                        FakeMan.setItemInHand(InteractionHand.MAIN_HAND, MaidPatch.getOriginal().getMainHandItem().copy());
-                        Vec3 vec3 = MaidPatch.getOriginal().position();
-                        FakeMan.moveTo(new Vec3(vec3.x, vec3.y, vec3.z));
-                        Level.addFreshEntity(FakeMan);
-                    }
-                }
-            }
-        }
-        static boolean isSpecialAnimation(MaidPatch<?> patch) {
-            AssetAccessor<? extends StaticAnimation> animation = Objects.requireNonNull(patch.getAnimator().getPlayerFor(null)).getRealAnimation();
-            return animation == EFN_ESekiroAnimations.OPEN_MORTAL_BLADE_1;
         }
     }
 }

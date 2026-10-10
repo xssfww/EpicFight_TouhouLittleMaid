@@ -9,8 +9,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import yesman.epicfight.api.asset.AssetAccessor;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
 @OnlyIn(Dist.CLIENT)

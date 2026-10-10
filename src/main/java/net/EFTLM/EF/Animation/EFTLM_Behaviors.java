@@ -10,7 +10,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
-import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.registry.entries.EpicFightItems;
 import java.util.Map;
 public class EFTLM_Behaviors {
     public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> Sword_OneHand;

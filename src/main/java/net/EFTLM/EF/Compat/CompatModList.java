@@ -1,6 +1,6 @@
 package net.EFTLM.EF.Compat;
 
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 public class CompatModList {
     public static String EFN = "efn";
     public static String EFN_Enhance = "efn_enhance";

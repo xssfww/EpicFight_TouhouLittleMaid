@@ -30,17 +30,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import yesman.epicfight.api.animation.Animator;
-import yesman.epicfight.api.forgeevent.EntityPatchRegistryEvent;
-import yesman.epicfight.api.forgeevent.InitAnimatorEvent;
+import yesman.epicfight.api.event.EpicFightEventHooks;
+import yesman.epicfight.api.event.types.animation.InitAnimatorEvent;
+import yesman.epicfight.api.event.types.registry.EntityPatchRegistryEvent;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -51,13 +52,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
 public class EventBus {
-    @Mod.EventBusSubscriber(
+    /**
+     * Epic Fight 21.x no longer fires its events on the NeoForge bus; it has its own
+     * {@link EpicFightEventHooks} registry. Called from the mod constructor so the listeners are in
+     * place before Epic Fight builds its entity patch / animator registries.
+     */
+    public static void RegisterEpicFightHooks() {
+        EpicFightEventHooks.Animation.INIT_ANIMATOR.registerEvent(ForgeEvents::RegisterAnimator);
+        EpicFightEventHooks.Registry.ENTITY_PATCH.registerEvent(ModEvents::RegistryPatch);
+    }
+
+    @EventBusSubscriber(
             modid = EFTLM.MODID,
-            bus = Mod.EventBusSubscriber.Bus.FORGE
+            bus = EventBusSubscriber.Bus.GAME
     )
     public static class ForgeEvents {
-        @SubscribeEvent
         public static void RegisterAnimator(InitAnimatorEvent event) {
             if (!(event.getEntityPatch() instanceof PlayerPatch<?>)) return;
             Animator animator = event.getAnimator();
@@ -73,23 +84,23 @@ public class EventBus {
             if (!(event.getSource().getEntity() instanceof EntityMaid maid)) return;
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
             if (maidPatch == null) return;
-            MinecraftForge.EVENT_BUS.post(new MaidKilledEvent(maidPatch, event.getEntity(), event.getSource()));
+            NeoForge.EVENT_BUS.post(new MaidKilledEvent(maidPatch, event.getEntity(), event.getSource()));
         }
         @SubscribeEvent
-        public static void MaidAttackListener(LivingAttackEvent event) {
+        public static void MaidAttackListener(LivingIncomingDamageEvent event) {
             if (!(event.getEntity().level() instanceof ServerLevel)) return;
             if (!(event.getSource().getEntity() instanceof EntityMaid maid)) return;
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
             if (maidPatch == null) return;
-            MinecraftForge.EVENT_BUS.post(new MaidHurtTargetEvent.Pre(maidPatch, event.getEntity(), event.getSource()));
+            NeoForge.EVENT_BUS.post(new MaidHurtTargetEvent.Pre(maidPatch, event.getEntity(), event.getSource()));
         }
         @SubscribeEvent
-        public static void MaidHurtListener(LivingHurtEvent event) {
+        public static void MaidHurtListener(LivingDamageEvent.Post event) {
             if (!(event.getEntity().level() instanceof ServerLevel)) return;
             if (!(event.getSource().getEntity() instanceof EntityMaid maid)) return;
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
             if (maidPatch == null) return;
-            MinecraftForge.EVENT_BUS.post(new MaidHurtTargetEvent.Post(maidPatch, event.getEntity(), event.getSource(), event.getAmount()));
+            NeoForge.EVENT_BUS.post(new MaidHurtTargetEvent.Post(maidPatch, event.getEntity(), event.getSource(), event.getNewDamage()));
         }
         @SubscribeEvent
         public static void MaidInteract(InteractMaidEvent event) {
@@ -261,18 +272,18 @@ public class EventBus {
             }
         }
     }
-    @Mod.EventBusSubscriber(
+
+    @EventBusSubscriber(
             modid = EFTLM.MODID,
-            bus = Mod.EventBusSubscriber.Bus.MOD
+            bus = EventBusSubscriber.Bus.MOD
     )
     public static class ModEvents {
-        @SubscribeEvent
         public static void RegistryPatch(EntityPatchRegistryEvent event) {
-            event.getTypeEntry().put(InitEntities.MAID.get(), entity -> {
+            event.registerEntityPatch(InitEntities.MAID.get(), entity -> {
                 if (entity.level().isClientSide()) {
-                    return ClientMaidPatch::new;
+                    return new ClientMaidPatch(entity);
                 } else {
-                    return MaidPatch::new;
+                    return new MaidPatch<>(entity);
                 }
             });
         }

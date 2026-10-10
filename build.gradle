@@ -1,109 +1,100 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
-    id 'eclipse'
-    id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.78'
 }
-
-apply plugin: 'org.spongepowered.mixin'
 
 group = mod_group_id
-
-ext {
-    mod_disname = "[史诗战斗：车万女仆]"
-}
+version = "${mod_version}+mc${minecraft_version}"
 
 base {
     archivesName = "${mod_disname}${mod_name}-${minecraft_version}-${mod_version}"
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
-        client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-        data {
-            workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
+repositories {
+    // The 1.21.1 dependency mods are kept in libs/ (same convention as the 1.20.1 branch).
+    // Note: with NeoForge 1.20.2+ production runs on Mojang official names, so the old
+    // `fg.deobf(...)` wrapper is no longer needed for them.
+    flatDir { dirs 'libs' }
 
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+        content { includeGroup 'curse.maven' }
     }
 }
 
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-    config "${mod_id}.mixins.json"
-    config "${mod_id}.efn.mixins.json"
+neoForge {
+    version = project.neo_version
+
+    // src/main/resources/META-INF/accesstransformer.cfg is currently empty; enable this line if the
+    // port ever needs an access transformer:
+    // accessTransformers.from 'src/main/resources/META-INF/accesstransformer.cfg'
+
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run')
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run')
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+            gameDirectory = project.file('run-data')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {
-    flatDir {
-        dir 'libs'
-    }
-    maven {
-        url "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-    exclusiveContent {
-        forRepository { maven { name = "Modrinth"; url = "https://api.modrinth.com/maven" } }
-        forRepositories(fg.repository)
-        filter { includeGroup "maven.modrinth" }
-    }
+dependencies {
+    // Required dependencies (1.21.1 builds, drop the jars into libs/):
+    //   libs/epicfight.jar          epic-fight-21.17.3.1-mc1.21.1-neoforge.jar
+    //   libs/touhoulittlemaid.jar   touhoulittlemaid-1.5.3-neoforge+mc1.21.1.jar
+    //   libs/epic_fight_avalon.jar  epic_fight_avalon-neoforge1.21.1-21.12.6.2.jar
+    //                               (use the build bundled inside NightFall 3.4.0 — the standalone
+    //                                21.12.6.2 build still references EpicFight's removed
+    //                                api/client/neoevent package and crashes at mixin apply)
+    //   libs/nightfall.jar          NightFall-1.21.1-Neoforge-3.4.0.jar  (optional at runtime)
+    implementation files('libs/epicfight.jar')
+    implementation files('libs/touhoulittlemaid.jar')
+    implementation files('libs/epic_fight_avalon.jar')
+    implementation files('libs/nightfall.jar')
+
+    // NightFall's own mandatory dependencies (runtime only, not needed to compile this mod):
+    //   libs/invincible.jar         invincible-21.15.8.2-mc1.21.1-neoforge.jar
+    //   libs/geckolib.jar           geckolib-neoforge-1.21.1-4.9.3.jar
+
+    // Maven alternative to libs/ (fill in the file ids if you prefer this):
+    // implementation "maven.modrinth:epic-fight:${epicfight_version}"
+    // implementation "curse.maven:touhou-little-maid-355044:<fileId>"
+    // implementation "curse.maven:epic-fight-avalon-1268823:<fileId>"
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation fg.deobf("libs:EpicFight-Nightfall:1.0.0")
-    implementation fg.deobf("libs:Nightfall-Enhance:1.0.0")
-    implementation fg.deobf("libs:indestructible:1.0.0")
-    implementation fg.deobf("libs:ef_skin:1.0.0")
-    implementation fg.deobf("libs:ef_anim_phy:1.0.0")
-    implementation fg.deobf("maven.modrinth:epic-fight:${epicfight_version}")
-    implementation fg.deobf("curse.maven:epic-fight-avalon-1268823:8849430")
-    implementation fg.deobf("curse.maven:touhou-little-maid-355044:8061847")
-    implementation fg.deobf("libs:YSM_GEO_Compat:1.0.0")
-    jarJar 'libs:YSM_GEO_Compat:[1.0.0,1.0.0]'
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 jar {
@@ -118,12 +109,4 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-}
-
-jar.finalizedBy('reobfJar')
-
-jarJar.enable()
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
 }
