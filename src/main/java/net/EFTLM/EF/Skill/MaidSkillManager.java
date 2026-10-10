@@ -5,7 +5,7 @@ import net.EFTLM.EF.API.Event.MaidSkillBuildEvent;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fml.ModLoader;
+import net.neoforged.fml.ModLoader;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
@@ -18,7 +18,8 @@ public class MaidSkillManager {
     protected static Map<Item, Map<Style, WeaponInnateSkill>> ItemStyleWeaponSkills = Maps.newHashMap();
     protected static Map<WeaponCategory, Map<Style, WeaponInnateSkill>> CategoryStyleWeaponSkills = Maps.newHashMap();
     public static void MaidSkillBuild() {
-        ModLoader.get().postEvent(new MaidSkillBuildEvent(MaidSkillRegister, WeaponSkillRegister, ItemStyleWeaponSkills, CategoryStyleWeaponSkills));
+        // 1.21.1: ModLoader.get() is gone, ModLoader.postEvent is static
+        ModLoader.postEvent(new MaidSkillBuildEvent(MaidSkillRegister, WeaponSkillRegister, ItemStyleWeaponSkills, CategoryStyleWeaponSkills));
     }
     public static MaidSkill getSkillFor(ResourceLocation RegisterName) {
         return MaidSkillRegister.get(RegisterName);

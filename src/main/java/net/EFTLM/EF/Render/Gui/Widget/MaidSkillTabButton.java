@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.registry.entries.EpicFightItems;
 import java.util.List;
 public class MaidSkillTabButton extends Button implements ITooltipButton {
     private static final ResourceLocation SIDE = ResourceLocation.fromNamespaceAndPath(TouhouLittleMaid.MOD_ID, "textures/gui/maid_gui_side.png");

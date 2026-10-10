@@ -17,16 +17,16 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.data.conditions.Condition;
-import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
+import yesman.epicfight.registry.entries.EpicFightConditions;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
@@ -91,8 +91,8 @@ public class BehaviorReloadListener extends SimpleJsonResourceReloadListener {
         if (tag.contains("items", Tag.TAG_LIST)) {
             ListTag itemsTag = tag.getList("items", Tag.TAG_STRING);
             for (int i = 0; i < itemsTag.size(); i++) {
-                Item item = ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(itemsTag.getString(i)));
-                if (item != null) items.add(item);
+                // 1.21.1: ForgeRegistries is gone; use BuiltInRegistries, and getOptional keeps the old "null when unknown" behaviour
+                BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemsTag.getString(i))).ifPresent(items::add);
             }
         }
         List<WeaponCategory> categories = Lists.newArrayList();
@@ -159,12 +159,11 @@ public class BehaviorReloadListener extends SimpleJsonResourceReloadListener {
         }
         return builder;
     }
-    @SuppressWarnings("unchecked")
     private static Condition<HumanoidMobPatch<?>> deserializeCondition(String type, CompoundTag args) throws Exception {
         ResourceLocation rl = type.contains(":") ? ResourceLocation.parse(type) : EpicFightMod.identifier(type);
-        Supplier<Condition<?>> provider = EpicFightConditions.getConditionOrNull(rl);
+        Supplier<Condition<HumanoidMobPatch<?>>> provider = EpicFightConditions.getConditionOrNull(rl);
         if (provider == null) throw new Exception("Unknown condition predicate: " + type);
-        Condition<HumanoidMobPatch<?>> cond = (Condition<HumanoidMobPatch<?>>) provider.get();
+        Condition<HumanoidMobPatch<?>> cond = provider.get();
         cond.read(args);
         return cond;
     }

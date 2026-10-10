@@ -9,11 +9,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import org.jetbrains.annotations.NotNull;
 public class MaidSkillContainer extends AbstractMaidContainer {
     protected final CompoundTag NBT;
-    public static final MenuType<MaidSkillContainer> TYPE = IForgeMenuType.create((windowId, inv, data) -> new MaidSkillContainer(windowId, inv, data.readVarInt(),data.readNbt()));
+    public static final MenuType<MaidSkillContainer> TYPE = IMenuTypeExtension.create((windowId, inv, data) -> new MaidSkillContainer(windowId, inv, data.readVarInt(),data.readNbt()));
     public MaidSkillContainer(int id, Inventory inventory, int entityId, CompoundTag nbt) {
         super(TYPE, id, inventory, entityId);
         this.NBT = nbt;

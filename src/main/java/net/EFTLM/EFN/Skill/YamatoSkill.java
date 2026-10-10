@@ -3,7 +3,7 @@ package net.EFTLM.EFN.Skill;
 import com.github.tartaricacid.touhoulittlemaid.api.event.MaidTickEvent;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.hm.efn.EFN;
-import com.hm.efn.gameasset.EFNEnchantment;
+import com.hm.efn.util.EFNEnchantHelper;
 import com.hm.efn.item.custom.YamatoItem;
 import net.EFTLM.EF.API.Event.MaidHurtTargetEvent;
 import net.EFTLM.EF.API.Event.MaidKilledEvent;
@@ -15,12 +15,14 @@ import net.EFTLM.EF.Skill.MaidSkillBuilder;
 import net.EFTLM.EF.Skill.MaidSkillDataKeys;
 import net.EFTLM.EF.Skill.MaidSkillDataManager;
 import net.EFTLM.EF.Skill.WeaponInnate.WeaponInnateSkill;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 public class YamatoSkill extends WeaponInnateSkill {
     private static final String PARAM_REINFORCE_CHANCE = "reinforce_chance";
     private static final String PARAM_REQUIRE_HEAVY_RAIN_ENCHANTMENT = "require_heavy_rain_enchantment";
@@ -78,9 +80,9 @@ public class YamatoSkill extends WeaponInnateSkill {
         if (!(Maid.level() instanceof ServerLevel)) return;
         ItemStack item = Maid.getMainHandItem();
         if (!(item.getItem() instanceof YamatoItem)) return;
-        CompoundTag tag = item.getOrCreateTag();
+        // 1.21.1: item.getOrCreateTag() -> CustomData.update(...); "TotalDamage" is only read back by this mod
         float totalDamage = YamatoItem.getTotalDamage(item);
-        tag.putFloat("TotalDamage",totalDamage + event.getAmount());
+        CustomData.update(DataComponents.CUSTOM_DATA, item, tag -> tag.putFloat("TotalDamage", totalDamage + event.getAmount()));
         tryReinforceSword(MaidPatch, item, event.getTarget());
     }
     @Override
@@ -89,9 +91,9 @@ public class YamatoSkill extends WeaponInnateSkill {
         EntityMaid Maid = MaidPatch.getOriginal();
         ItemStack item = Maid.getMainHandItem();
         if (item.getItem() instanceof YamatoItem) {
-            CompoundTag tag = item.getOrCreateTag();
+            // 1.21.1: item.getOrCreateTag() -> CustomData.update(...) (matches NightFall's own YamatoItem)
             int currentCount = YamatoItem.getKillCount(item);
-            tag.putInt("KillCount", currentCount + 1);
+            CustomData.update(DataComponents.CUSTOM_DATA, item, tag -> tag.putInt("KillCount", currentCount + 1));
         }
     }
     private void tryReinforceSword(MaidPatch<?> patch, ItemStack item, LivingEntity target) {
@@ -104,7 +106,8 @@ public class YamatoSkill extends WeaponInnateSkill {
         boolean canBlast = hasTarget && isCooldownReady(patch, MaidSkillDataKeys.YAMATO_BLAST_COOLDOWN);
         boolean canSwordRain = hasTarget && isCooldownReady(patch, MaidSkillDataKeys.YAMATO_SWORD_RAIN_COOLDOWN);
         boolean canHeavyRain = hasTarget && stack >= HEAVY_RAIN_COST && isCooldownReady(patch, MaidSkillDataKeys.YAMATO_HEAVY_RAIN_COOLDOWN)
-                && (!this.requireHeavyRainEnchantment || item.getEnchantmentLevel(EFNEnchantment.YAMATO_HEAVY_RAIN.get()) > 0);
+                // 1.21.1: EFNEnchantment is gone in NightFall 3.4.0; EFNEnchantHelper.has(...) is the replacement
+                && (!this.requireHeavyRainEnchantment || EFNEnchantHelper.has(maid, item, EFNEnchantHelper.YAMATO_HEAVY_RAIN));
         boolean canFormation = stack >= FORMATION_COST && EFNCompat.canSummonAtWaist(patch);
         int totalWeight = (canBlast ? BLAST_WEIGHT : 0) + (canSwordRain ? SWORD_RAIN_WEIGHT : 0)
                 + (canHeavyRain ? HEAVY_RAIN_WEIGHT : 0) + (canFormation ? FORMATION_WEIGHT : 0);

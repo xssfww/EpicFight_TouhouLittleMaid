@@ -4,9 +4,9 @@ import net.EFTLM.EF.API.AbstractMaidEvent;
 import net.EFTLM.EF.Capability.MaidPatch;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.Cancelable;
-@Cancelable
-public class MaidSkillRemoveEvent extends AbstractMaidEvent {
+import net.neoforged.bus.api.ICancellableEvent;
+// 1.21.1: the @Cancelable annotation is gone; cancellable events implement ICancellableEvent instead
+public class MaidSkillRemoveEvent extends AbstractMaidEvent implements ICancellableEvent {
     private final MaidSkill skill;
     public MaidSkillRemoveEvent(MaidPatch<?> MaidPatch, MaidSkill skill) {
         super(MaidPatch);

@@ -1,7 +1,7 @@
 package net.EFTLM.EF.Model.Mesh;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.*;
 import javax.annotation.Nullable;
 import java.util.*;

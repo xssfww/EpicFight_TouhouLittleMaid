@@ -71,7 +71,8 @@ public class Claw {
                                                 if (skill == null) return;
                                                 BehaviorsBuild.setStack(Patch,0);
                                                 BehaviorsBuild.setData(Patch,skill,MaidSkillDataKeys.CLAW_TIME, 600);
-                                                Patch.getOriginal().addEffect(new MobEffectInstance(EFNMobEffectRegistry.CLAW.get(), 600, 0));
+                                                // 1.21.1: DeferredHolder<MobEffect, MobEffect> is itself a Holder<MobEffect>
+                                                Patch.getOriginal().addEffect(new MobEffectInstance(EFNMobEffectRegistry.CLAW, 600, 0));
                                             })
                                             .withinDistance(0.0D, 4.0D))
                     );

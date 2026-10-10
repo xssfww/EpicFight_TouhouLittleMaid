@@ -22,7 +22,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
 import java.util.List;
 import java.util.Map;
 public class Step extends MaidSkill {
@@ -108,7 +108,7 @@ public class Step extends MaidSkill {
                 }
                 if (patch.getOriginal().tickCount - Counter > 10) {
                     patch.setData(this, MaidSkillDataKeys.STEP_RESTORE_COUNTER, patch.getOriginal().tickCount);
-                    AttributeInstance Weight = patch.getOriginal().getAttribute(EpicFightAttributes.WEIGHT.get());
+                    AttributeInstance Weight = patch.getOriginal().getAttribute(EpicFightAttributes.WEIGHT);
                     if (Weight != null) {
                         patch.setStamina((float) (patch.getStamina() - (Weight.getValue() * 0.1F)));
                     }

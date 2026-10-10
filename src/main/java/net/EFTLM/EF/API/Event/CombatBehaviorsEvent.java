@@ -1,7 +1,7 @@
 package net.EFTLM.EF.API.Event;
 
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.Style;

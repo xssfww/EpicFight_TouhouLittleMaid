@@ -4,6 +4,7 @@ import net.EFTLM.EF.API.Data.BehaviorReloadListener;
 import net.EFTLM.EF.API.Data.SkillDataReloadListener;
 import net.EFTLM.EF.Animation.EFTLM_LivingMotions;
 import net.EFTLM.EF.Command.MaidSkillCommand;
+import net.EFTLM.EF.Event.EventBus;
 import net.EFTLM.EF.Item.MaidSkillBookItem;
 import net.EFTLM.EF.Network.PacketHandler;
 import net.EFTLM.EF.Register.EFTLM_Item;
@@ -13,32 +14,37 @@ import net.EFTLM.EF.Register.EFTLM_Tab;
 import net.EFTLM.EF.Skill.MaidSkill;
 import net.EFTLM.EF.Skill.MaidSkillManager;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import yesman.epicfight.api.animation.LivingMotion;
-@Mod("ef_tlm")
+
+@Mod(EFTLM.MODID)
 public class EFTLM {
     public static final String MODID = "ef_tlm";
-    public EFTLM() {
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        PacketHandler.RegisterManager();
-        EFTLM_Item.ITEMS.register(bus);
-        EFTLM_Menu.MENUS.register(bus);
-        EFTLM_Tab.TABS.register(bus);
-        EFTLM_Recipe.SERIALIZERS.register(bus);
+
+    public EFTLM(IEventBus modBus) {
+        PacketHandler.RegisterManager(modBus);
+        EFTLM_Item.ITEMS.register(modBus);
+        EFTLM_Menu.MENUS.register(modBus);
+        EFTLM_Tab.TABS.register(modBus);
+        EFTLM_Recipe.SERIALIZERS.register(modBus);
         LivingMotion.ENUM_MANAGER.registerEnumCls(MODID, EFTLM_LivingMotions.class);
-        MinecraftForge.EVENT_BUS.addListener(this::addReloadListenerEvent);
-        MinecraftForge.EVENT_BUS.addListener(MaidSkillCommand::RegisterCommands);
-        bus.addListener(this::BuildCreativeTabWithSkillBooks);
+        // Epic Fight 21 uses its own event registry, so its hooks must be registered before Epic
+        // Fight builds the entity patch / animator registries (i.e. during mod construction).
+        EventBus.RegisterEpicFightHooks();
+        NeoForge.EVENT_BUS.addListener(this::addReloadListenerEvent);
+        NeoForge.EVENT_BUS.addListener(MaidSkillCommand::RegisterCommands);
+        modBus.addListener(this::BuildCreativeTabWithSkillBooks);
     }
+
     protected void addReloadListenerEvent(AddReloadListenerEvent event) {
         event.addListener(new BehaviorReloadListener());
         event.addListener(new SkillDataReloadListener());
     }
+
     protected void BuildCreativeTabWithSkillBooks(BuildCreativeModeTabContentsEvent event) {
         MaidSkillManager.getNonWeaponSkillName().forEach((rl) -> {
             MaidSkill Skill = MaidSkillManager.getSkillFor(rl);

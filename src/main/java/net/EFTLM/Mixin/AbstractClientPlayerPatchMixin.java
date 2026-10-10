@@ -9,26 +9,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-@Mixin(value = AbstractClientPlayerPatch.class,remap = false)
-public abstract class AbstractClientPlayerPatchMixin <T extends AbstractClientPlayer> extends PlayerPatch<T> {
-    @Shadow protected abstract boolean isMoving();
+
+@Mixin(value = AbstractClientPlayerPatch.class, remap = false)
+public abstract class AbstractClientPlayerPatchMixin {
+    // 1.21.1: Epic Fight 21 requires the original entity in the patch constructor, so this mixin can
+    // neither extend PlayerPatch nor @Shadow the fields that PlayerPatch/EntityPatch declare
+    // (Mixin only resolves @Shadow members declared in the target class itself — it failed at runtime
+    // with "@Shadow field original was not located in the target class").
+    // Instead the mixin casts itself and uses Epic Fight's own accessors / public field.
+    @Shadow(remap = false) protected abstract boolean isMoving();
+
     @Inject(method = "updateMotion", at = @At("TAIL"))
     public void InjectAnimator(boolean considerInaction, CallbackInfo ci) {
-        if (this.original.getFirstPassenger() instanceof EntityMaid) {
+        AbstractClientPlayerPatch<?> self = (AbstractClientPlayerPatch<?>) (Object) this;
+        AbstractClientPlayer original = self.getOriginal();
+        if (original.getFirstPassenger() instanceof EntityMaid) {
             if (this.isMoving()) {
-                if (this.original.isCrouching()) {
-                    this.currentLivingMotion = EFTLM_LivingMotions.HUG_SNEAK;
-                } else if(this.original.isSprinting()) {
-                    this.currentLivingMotion = EFTLM_LivingMotions.HUG_RUN;
+                if (original.isCrouching()) {
+                    self.currentLivingMotion = EFTLM_LivingMotions.HUG_SNEAK;
+                } else if(original.isSprinting()) {
+                    self.currentLivingMotion = EFTLM_LivingMotions.HUG_RUN;
                 } else {
-                    this.currentLivingMotion = EFTLM_LivingMotions.HUG_WALK;
+                    self.currentLivingMotion = EFTLM_LivingMotions.HUG_WALK;
                 }
             } else {
                 if (original.isCrouching()) {
-                    this.currentLivingMotion = EFTLM_LivingMotions.HUG_KNEEL;
+                    self.currentLivingMotion = EFTLM_LivingMotions.HUG_KNEEL;
                 } else {
-                    this.currentLivingMotion = EFTLM_LivingMotions.HUG;
+                    self.currentLivingMotion = EFTLM_LivingMotions.HUG;
                 }
             }
         }

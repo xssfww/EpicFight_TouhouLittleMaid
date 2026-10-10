@@ -1,6 +1,7 @@
 package net.EFTLM.EF.Render.Gui;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import com.github.tartaricacid.touhoulittlemaid.util.GuiTools;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
@@ -21,7 +22,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import yesman.epicfight.main.EpicFightMod;
@@ -43,7 +44,7 @@ public class MaidSkillBookScreen extends Screen {
         this.Skill = Skill;
         this.ParentScreen = ParentScreen;
         this.MaidId = MaidId;
-        this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0, 0, 9);
+        this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0, 9);
         List<FormattedCharSequence> list = Minecraft.getInstance().font.split(this.Skill.getDesc(this.resolveMaidPatch()), 148);
         list.forEach(skillTooltipList::add);
     }
@@ -66,8 +67,9 @@ public class MaidSkillBookScreen extends Screen {
         } else {
             this.customScale = window.getGuiScale();
         }
-        this.skillTooltipList.updateSize(210, 400, this.height / 2 - 100, (this.height + 80) / 2);
-        this.skillTooltipList.setLeftPos(this.width / 2 - 40);
+        // 1.21.1: AbstractSelectionList#updateSize(w, h, y0, y1) -> updateSizeAndPosition(w, height, y) + setX(..)
+        this.skillTooltipList.updateSizeAndPosition(210, (this.height + 80) / 2 - (this.height / 2 - 100), this.height / 2 - 100);
+        this.skillTooltipList.setX(this.width / 2 - 40);
         this.addRenderableWidget(this.skillTooltipList);
         if (this.canForget()) {
             this.addRenderableWidget(new ForgetButton(Button.builder(Component.translatable("gui.ef_tlm.button.forget_skill"), button -> this.forgetSkill())
@@ -94,11 +96,12 @@ public class MaidSkillBookScreen extends Screen {
         double originalScale = window.getGuiScale();
         if (originalScale != this.customScale) {
             window.setGuiScale(this.customScale);
-            Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, ForgeHooksClient.getGuiFarPlane());
+            Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, ClientHooks.getGuiFarPlane());
             RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
         }
         if (!asBackground) {
-            this.renderBackground(guiGraphics);
+            // 1.21.1: Screen#renderBackground now takes the mouse position and partial ticks
+            this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         }
         int posX = (this.width - 284) / 2;
         int posY = (this.height - 165) / 2;
@@ -113,12 +116,12 @@ public class MaidSkillBookScreen extends Screen {
         guiGraphics.drawString(this.font, skillName, posX + 56 - width / 2, posY + 75, 0, false);
         super.render(guiGraphics, (int)((double)mouseX * originalScale / this.customScale), (int)((double)mouseY * originalScale / this.customScale), partialTicks);
         if (asBackground) {
-            this.renderBackground(guiGraphics);
+            this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
         }
         guiGraphics.pose().popPose();
         if (originalScale != this.customScale) {
             window.setGuiScale(originalScale);
-            Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, ForgeHooksClient.getGuiFarPlane());
+            Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, ClientHooks.getGuiFarPlane());
             RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
         }
     }
@@ -148,9 +151,9 @@ public class MaidSkillBookScreen extends Screen {
         return super.mouseDragged((int)(mouseX * window.getGuiScale() / this.customScale), (int)(mouseY * window.getGuiScale() / this.customScale), button, dx, dy);
     }
     @Override
-    public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+    public boolean mouseScrolled(double pMouseX, double pMouseY, double xScroll, double yScroll) {
         Window window = Minecraft.getInstance().getWindow();
-        return super.mouseScrolled((int)(pMouseX * window.getGuiScale() / this.customScale), (int)(pMouseY * window.getGuiScale() / this.customScale), pDelta);
+        return super.mouseScrolled((int)(pMouseX * window.getGuiScale() / this.customScale), (int)(pMouseY * window.getGuiScale() / this.customScale), xScroll, yScroll);
     }
     protected static class ForgetButton extends Button {
         protected ForgetButton(Button.Builder builder) {
@@ -167,7 +170,8 @@ public class MaidSkillBookScreen extends Screen {
                 texX = 156;
             }
             guiGraphics.pose().pushPose();
-            guiGraphics.blitNineSliced(SKILLBOOK_BACKGROUND, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 45, 15, texX, 193);
+            // 1.21.1: GuiGraphics#blitNineSliced was removed; TLM reimplements it in GuiTools with the same arguments
+            GuiTools.blitNineSliced(guiGraphics, SKILLBOOK_BACKGROUND, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 45, 15, texX, 193);
             guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
             guiGraphics.pose().popPose();
             int color = this.getFGColor();
@@ -175,17 +179,23 @@ public class MaidSkillBookScreen extends Screen {
         }
     }
     protected class SkillTooltipList extends ObjectSelectionList<SkillTooltipList.TooltipLine> {
-        protected SkillTooltipList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
-            super(minecraft, width, height, y0, y1, itemHeight);
-            this.setRenderBackground(false);
+        protected SkillTooltipList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
+            super(minecraft, width, height, y, itemHeight);
             this.setRenderHeader(false, 0);
-            this.setRenderTopAndBottom(false);
+        }
+        // 1.21.1: setRenderBackground(false) / setRenderTopAndBottom(false) were removed; the 1.20.1 flags
+        // are now expressed by overriding the list background and separator rendering
+        @Override
+        protected void renderListBackground(@NotNull GuiGraphics guiGraphics) {
+        }
+        @Override
+        protected void renderListSeparators(@NotNull GuiGraphics guiGraphics) {
         }
         protected void add(FormattedCharSequence tooltip) {
             this.addEntry(new SkillTooltipList.TooltipLine(tooltip));
         }
         protected int getScrollbarPosition() {
-            return this.x1 - 6;
+            return this.getRight() - 6;
         }
         protected class TooltipLine extends ObjectSelectionList.Entry<SkillTooltipList.TooltipLine> {
             protected final FormattedCharSequence tooltip;

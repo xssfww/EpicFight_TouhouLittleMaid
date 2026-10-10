@@ -27,8 +27,8 @@ public class BloodLustSkill extends WeaponInnateSkill {
     public void onRemove(MaidChangeItemEvent event) {
         super.onRemove(event);
         EntityMaid maid = event.getMaidPatch().getOriginal();
-        if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST.get())) {
-            maid.removeEffect(EFNMobEffectRegistry.BLODDLUST.get());
+        if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST)) {
+            maid.removeEffect(EFNMobEffectRegistry.BLODDLUST);
         }
     }
     @Override
@@ -36,7 +36,7 @@ public class BloodLustSkill extends WeaponInnateSkill {
         super.onMaidTick(event, patch);
         EntityMaid maid = patch.getOriginal();
         if (patch.getTarget() == null) {
-            if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST.get())) {
+            if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST)) {
                 EFNCompat.clearBloodLust(patch);
             }
         } else {
@@ -51,7 +51,7 @@ public class BloodLustSkill extends WeaponInnateSkill {
     public void onHurtTargetPost(MaidHurtTargetEvent.Post event) {
         super.onHurtTargetPost(event);
         EntityMaid maid = event.getMaidPatch().getOriginal();
-        if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST.get())) {
+        if (maid.hasEffect(EFNMobEffectRegistry.BLODDLUST)) {
             float healAmount = event.getAmount() * HEAL_RATIO;
             maid.heal(healAmount);
         }
