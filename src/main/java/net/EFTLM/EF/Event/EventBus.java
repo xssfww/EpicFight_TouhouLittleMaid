@@ -28,6 +28,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -93,6 +95,29 @@ public class EventBus {
             MaidPatch<?> maidPatch = EpicFightCapabilities.getEntityPatch(maid, MaidPatch.class);
             if (maidPatch == null) return;
             NeoForge.EVENT_BUS.post(new MaidHurtTargetEvent.Pre(maidPatch, event.getEntity(), event.getSource()));
+        }
+        /**
+         * 1.21.1 fix: Epic Fight applies its damage through its own animation pipeline
+         * (entity.hurt(...)), which bypasses {@code Player#attack} — so the owner's
+         * {@code lastHurtMob} never gets updated during an Epic Fight battle.
+         * <p>
+         * Touhou Little Maid decides whether a maid may attack something in
+         * {@code IAttackTask#canAttack} / {@code DefaultMonsterType}: anything that is not a vanilla
+         * {@code Enemy} counts as NEUTRAL and is only attacked while it is the owner's
+         * {@code lastHurtMob} / {@code lastHurtByMob} (or the maid's {@code lastHurtByMob}).
+         * Because Epic Fight attacks never recorded the target, maids ignored exactly those
+         * mobs — typically modded monsters, which rarely implement {@code Enemy} — that the player
+         * was fighting, while vanilla monsters (HOSTILE) still worked.
+         * <p>
+         * Mirroring what vanilla {@code Player#attack} does restores the maid's assist behaviour.
+         */
+        @SubscribeEvent
+        public static void MaidOwnerHurtTargetRecord(LivingIncomingDamageEvent event) {
+            if (event.getSource().getEntity() instanceof Player player
+                    && event.getEntity() instanceof LivingEntity target
+                    && player.getLastHurtMob() != target) {
+                player.setLastHurtMob(target);
+            }
         }
         @SubscribeEvent
         public static void MaidHurtListener(LivingDamageEvent.Post event) {
