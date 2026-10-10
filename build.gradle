@@ -70,22 +70,23 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    // Required dependencies (1.21.1 builds, drop the jars into libs/):
+    // Required dependencies (1.21.1 builds, shipped in libs/ — see libs/README.md):
     //   libs/epicfight.jar          epic-fight-21.17.3.1-mc1.21.1-neoforge.jar
     //   libs/touhoulittlemaid.jar   touhoulittlemaid-1.5.3-neoforge+mc1.21.1.jar
-    //   libs/epic_fight_avalon.jar  epic_fight_avalon-neoforge1.21.1-21.12.6.2.jar
-    //                               (use the build bundled inside NightFall 3.4.0 — the standalone
-    //                                21.12.6.2 build still references EpicFight's removed
-    //                                api/client/neoevent package and crashes at mixin apply)
-    //   libs/nightfall.jar          NightFall-1.21.1-Neoforge-3.4.0.jar  (optional at runtime)
+    //   libs/epic_fight_avalon.jar  the Avalon build bundled inside NightFall 3.4.0
+    //                               (use that one — the standalone 21.12.6.2 build still references
+    //                                EpicFight's removed api/client/neoevent package and crashes
+    //                                at mixin apply)
+    //   libs/nightfall.jar          NightFall-1.21.1-Neoforge-3.4.0.jar (optional at runtime)
     implementation files('libs/epicfight.jar')
     implementation files('libs/touhoulittlemaid.jar')
     implementation files('libs/epic_fight_avalon.jar')
     implementation files('libs/nightfall.jar')
 
-    // NightFall's own mandatory dependencies (runtime only, not needed to compile this mod):
-    //   libs/invincible.jar         invincible-21.15.8.2-mc1.21.1-neoforge.jar
-    //   libs/geckolib.jar           geckolib-neoforge-1.21.1-4.9.3.jar
+    // NightFall's own mandatory dependencies: runtime only, but required for `runClient`
+    // to let NightFall load at all.
+    runtimeOnly files('libs/invincible.jar')
+    runtimeOnly files('libs/geckolib.jar')
 
     // Maven alternative to libs/ (fill in the file ids if you prefer this):
     // implementation "maven.modrinth:epic-fight:${epicfight_version}"
